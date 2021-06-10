@@ -1,3 +1,5 @@
+# Copyright 2021 by Alexei Bezborodov <AlexeiBv@narod.ru>
+
 import random
 SPACE = " "
 X = "X"
