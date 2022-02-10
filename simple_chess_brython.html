@@ -3,7 +3,7 @@
 
 <head>
     <title>Simple chess game</title>
-    
+
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.8.9/brython.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.8.9/brython_stdlib.js"></script>
 </head>
@@ -18,20 +18,20 @@
         import random
 
         out = ""
-        
+    
         cur_x = 1
         cur_y = 1
 
         def game():
             global out
-            
+
             out = "<table border=1>"
             out += "<tr>"
             out += "<td></td>"
             for d in range(8):
                 out += "<td>" + str(d + 1) + "</td>"
             out += "</tr>"
-            
+
             for y in range(8):
                 out += "<tr>"
                 for x in range(9):
@@ -62,7 +62,7 @@
         document.addEventListener("keydown", key_push)
         game_loop = window.setInterval(game, 1000/10)
 
-</script>
+    </script>
 
 </body>
 
