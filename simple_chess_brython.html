@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Simple chess game</title>
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.8.9/brython.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.8.9/brython_stdlib.js"></script>
+</head>
+
+<body onload="brython()">
+    <p id="game_board" class="text-center"></p>
+    <p id="key_show" class="text-center"></p>
+
+    <script type="text/python">
+
+        from browser import document, html, window
+        import random
+
+        out = ""
+        
+        cur_x = 1
+        cur_y = 1
+
+        def game():
+            global out
+            
+            out = "<table border=1>"
+            out += "<tr>"
+            out += "<td></td>"
+            for d in range(8):
+                out += "<td>" + str(d + 1) + "</td>"
+            out += "</tr>"
+            
+            for y in range(8):
+                out += "<tr>"
+                for x in range(9):
+                    if x == 0:
+                        out += '<td></td>'
+                    elif cur_x == x and cur_y == y + 1:
+                        out += '<td bgcolor=red></td>'
+                    else:
+                        out += '<td>&#9812;</td>'
+                out += "</tr>"
+            out += "</table>"
+            document["game_board"].innerHTML = out
+
+        def key_push(evt):
+            global cur_x, cur_y
+            key = evt.keyCode
+            if key == 37:
+                cur_x -= 1
+            elif key == 38:
+                cur_y -= 1
+            elif key == 39:
+                cur_x += 1
+            elif key == 40:
+                cur_y += 1
+            else:
+                document["key_show"].innerHTML = "key = " + str(key)
+
+        document.addEventListener("keydown", key_push)
+        game_loop = window.setInterval(game, 1000/10)
+
+</script>
+
+</body>
+
+</html>
