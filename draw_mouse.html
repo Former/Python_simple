@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Mouse Draw</title>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.8.9/brython.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.8.9/brython_stdlib.js"></script>
+</head>
+
+<body onload="brython()">
+
+<canvas id="draw-board" width="500" height="500"></canvas>
+
+<script type="text/python">
+
+from browser import document, html, window
+
+last_x = 0
+last_y = 0
+mouse_down = 0
+
+canvas = document["draw-board"]
+ctx = canvas.getContext("2d")
+
+# Чёрный экран
+ctx.fillStyle = "black"
+ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+def DrawLine(x1, y1, x2, y2):
+    ctx.strokeStyle = 'lime'
+    ctx.lineWidth = 5
+    ctx.beginPath()
+    ctx.moveTo(x1, y1)
+    ctx.lineTo(x2, y2)
+    ctx.stroke()
+    return
+
+def Mouse_Move(evt):
+    global mouse_down
+    if mouse_down != 1:
+        return;
+    
+    global last_x
+    global last_y
+    DrawLine(last_x, last_y, evt.clientX, evt.clientY)
+    last_x = evt.clientX 
+    last_y = evt.clientY
+
+def Mouse_Down(evt):
+    global mouse_down
+    mouse_down = 1
+        
+    global last_x
+    global last_y
+    last_x = evt.clientX 
+    last_y = evt.clientY
+
+def Mouse_Up(evt):
+    global mouse_down
+    mouse_down = 0
+
+
+document.addEventListener("mousemove", Mouse_Move)
+document.addEventListener("mousedown", Mouse_Down)
+document.addEventListener("mouseup", Mouse_Up)
+
+
+</script>
+
+</body>
+
+</html>
