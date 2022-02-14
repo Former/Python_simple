@@ -33,15 +33,15 @@ def DrawLine(x1, y1, x2, y2):
     return
 
 def DrawTriangle(x1, y1, x2, y2, x3, y3):
-    DrawLine(x1, y1, x2, y2);
-    DrawLine(x1, y1, x3, y3);
-    DrawLine(x2, y2, x3, y3);
+    DrawLine(x1, y1, x2, y2)
+    DrawLine(x1, y1, x3, y3)
+    DrawLine(x2, y2, x3, y3)
 
 def DrawSquare(x1, y1, x2, y2, x3, y3, x4, y4):
-    DrawLine(x1, y1, x2, y2);
-    DrawLine(x2, y2, x3, y3);
-    DrawLine(x3, y3, x4, y4);
-    DrawLine(x1, y1, x4, y4);
+    DrawLine(x1, y1, x2, y2)
+    DrawLine(x2, y2, x3, y3)
+    DrawLine(x3, y3, x4, y4)
+    DrawLine(x1, y1, x4, y4)
 
 def DrawTriangleSerpinsky(x1, y1, x2, y2, x3, y3, dep):
     if dep < 1:
