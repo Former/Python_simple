@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Простая заготовка</title>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.8.9/brython.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.8.9/brython_stdlib.js"></script>
+</head>
+<body onload="brython()">
+
+<p id="out-text"></p>
+
+<script type="text/python">
+
+from browser import document, html, window
+
+def myprint(s):
+    document["out-text"].innerHTML = document["out-text"].innerHTML + "<br />" + str(s)
+
+# Тут код на питоне
+myprint("Привет мир!")
+
+
+</script>
+
+</body>
+
+</html>
+
+
