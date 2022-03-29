@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Простая шахматная доска на python</title>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.8.9/brython.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.8.9/brython_stdlib.js"></script>
+</head>
+<body onload="brython()">
+
+<p id="out-text"></p>
+
+<script type="text/python">
+
+from browser import document, html, window
+
+# Тут код на питоне
+
+board = [
+'♜', '♞', '♝', '♛', '♚', '♝', '♞', '♜', '♟', '♟', '♟', '♟', '♟', '♟', '♟', '♟', 
+' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
+' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 
+'♙', '♙', '♙', '♙', '♙', '♙', '♙', '♙', '♖', '♘', '♗', '♕', '♔', '♗', '♘', '♖',
+]
+
+result_html = "<table border = 1>" 
+
+result_html += "<tr> <td></td> <td>a</td> <td>b</td> <td>c</td> <td>d</td> <td>e</td> <td>f</td> <td>g</td> <td>h</td>  </tr>" 
+
+for y in range(8):
+    result_html += "<tr> <td>" + str(y + 1) + " </td>"
+    for x in range(8):
+        bgcolor = ""
+        if (x + y) % 2 == 1: 
+            bgcolor = "bgcolor=#999999"
+        result_html += "<td " + bgcolor +  " >" + board[y * 8 + x] + "</td>"
+
+    result_html += "</tr>"
+
+result_html += "</table>"
+
+document["out-text"].innerHTML += result_html
+
+</script>
+
+</body>
+
+</html>
+
+
+
+
