@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Подсветка кода</title>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.8.9/brython.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.8.9/brython_stdlib.js"></script>
+
+<!-- code class="python" -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/python.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/ocean.min.css" />
+
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad()
+</script>
+
+</head>
+<body onload="brython()">
+
+<button id="button">Вывод кода</button>
+
+
+<script type="text/python">
+
+from browser import document, html, window
+
+code = "a = 0\nfor i in range(8):\n\tprint(\"Привет мир!\")"
+
+def show_values(event):
+    document["out-text"].innerHTML = window.hljs.highlightAuto(code).value
+
+document["button"].bind("click", show_values)
+
+</script>
+
+<p >
+<pre><code class="hljs python" id="out-text"></code></pre>
+</p>
+
+</body>
+
+</html>
+
+
