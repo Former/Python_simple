@@ -1,3 +1,4 @@
+# Copyright 2022 by Alexei Bezborodov <AlexeiBv@narod.ru>
 maxx = 0
 b = 0
 for i in range(1, 1001):

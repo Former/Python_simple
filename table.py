@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# Copyright 2022 by Alexei Bezborodov <AlexeiBv@narod.ru>
 
 width = 3 # ширина
 height = 3 # высота

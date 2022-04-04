@@ -1,3 +1,5 @@
+# Copyright 2022 by Alexei Bezborodov <AlexeiBv@narod.ru>
+
 import math
 
 max_x = 64

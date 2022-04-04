@@ -1,3 +1,4 @@
+# Copyright 2022 by Alexei Bezborodov <AlexeiBv@narod.ru>
 '''
 8	♜	♞	♝	♛	♚	♝	♞	♜
 7	♟	♟	♟	♟	♟	♟	♟	♟
