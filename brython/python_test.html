@@ -1,0 +1,217 @@
+<!-- Copyright 2022 by Alexei Bezborodov <AlexeiBv@narod.ru> -->
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Подсветка кода</title>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.10.5/brython.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.10.5/brython_stdlib.js"></script>
+
+<!-- code class="python" -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/python.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/ocean.min.css" />
+
+</head>
+<body onload="brython()">
+
+<table>
+<tr> <td width = 300 height = 200>
+<pre><code class="hljs python" id="out-code"></code></pre>
+</td> </tr>
+</table>
+
+<table>
+<tr> <td width = 150> <input type="button" id="button_1" value="" width = 150></input> </td> <td width = 150> <input type="button" id="button_3" value="" width = 150></input> </td> </tr>
+<tr> <td width = 150> <input type="button" id="button_2" value="" width = 150></input> </td> <td width = 150> <input type="button" id="button_4" value="" width = 150></input> </td> </tr>
+</table>
+
+<p id="print_out"></p>
+<p id="good_answer" style="color:#FFFFFF";></p>
+
+<h3>Результаты</h3>
+<p id="result_out"></p>
+
+<script type="text/python">
+
+from browser import document, html, window
+import random
+
+global g_good_answer
+global buttons 
+buttons = ["button_1", "button_2", "button_3", "button_4"]
+
+global g_CodeTemplates
+g_CodeTemplates = [
+"print(@rand_int)",
+"print(@rand_int @rand_math @rand_int)",
+"print(@rand_int @rand_math @rand_int @rand_math @rand_int)",
+"print(@rand_int @rand_math (@rand_int @rand_math @rand_int))",
+"print((@rand_int @rand_math @rand_int) @rand_math @rand_int)",
+"x = @rand_int\nprint(x)",
+"x = @rand_int\nfor i in range(@rand_int):\n\tx += i\nprint(x)"
+]
+
+global g_Result
+g_Result = [[]]
+
+global g_Code
+g_Code = ""
+
+def my_prnt(s):
+    document["print_out"].innerHTML += str(s)
+
+def CleanPrint():
+    document["print_out"].innerHTML = ""
+
+def GetPrintResult():
+    return document["print_out"].innerHTML
+
+def SetGoodAnswer(s):
+    document["good_answer"].innerHTML = str(s)
+
+def CleanGoodAnswer():
+    document["good_answer"].innerHTML = ""
+
+def GetGoodAnswer():
+    return document["good_answer"].innerHTML
+
+def SaveCode(code):
+    global g_Code
+    g_Code = str(code)
+
+def GetCode():
+    global g_Code
+    return g_Code 
+
+def AddToResult(a_Code, a_Value, a_Result):
+    global g_Result
+    g_Result += [[a_Code, a_Value, a_Result]]
+    
+    res = "<table border = 1> <tr> <th>Код</th> <th>Ответ</th> <th>Результат</th> </tr>"
+    for i in range(len(g_Result)):
+        r = g_Result[i]
+        if len(r) < 3:
+            continue
+        code = r[0]
+        value = r[1]
+        result = r[2]
+        vcolor = "#FF0000"
+        if result == "Верно":
+            vcolor = "#00FF00"
+        res += "<tr>" + "<td>" + str(code) + "</td>" +"<td>" + str(value) + "</td>" + "<td " + "bgcolor = " + vcolor + ">" + str(result) + "</td></tr>"
+    
+    document["result_out"].innerHTML = res + "</table>"
+
+def ReplaceRandInt(code):
+    return code.replace("@rand_int", str(random.randint(-15, 15)), 1)
+
+def ReplaceRandMath(code):
+    math_op = ["+", "-", "*", "/", "%"]
+    return code.replace("@rand_math", math_op[random.randint(0, len(math_op))], 1)
+
+def PrepareTemplate(code_template):
+    code = code_template
+
+    new_code = ReplaceRandInt(code)
+    while code != new_code:
+        code = new_code
+        new_code = ReplaceRandInt(code)
+
+    new_code = ReplaceRandMath(code)
+    while code != new_code:
+        code = new_code
+        new_code = ReplaceRandMath(code)
+    
+    return code
+
+def GetTemplate():
+    global g_CodeTemplates
+    template = g_CodeTemplates[random.randint(0, len(g_CodeTemplates))]
+    return template
+
+def GenTest():    
+    CleanPrint()
+    code_template = GetTemplate()
+    code = PrepareTemplate(code_template)
+
+    code_prnt = code.replace("print", "my_prnt")
+    
+    try:
+        exec(code_prnt)
+    except SyntaxError:
+        return False
+
+    SaveCode(code)
+    document["out-code"].innerHTML = window.hljs.highlightAuto(code).value
+    
+    result = GetPrintResult()
+    CleanPrint()
+    
+    butt_labels = [""] * 4
+    for i in range(4):
+        r = random.randint(-5, 5)
+        if r == 0:
+            r = 1
+        butt_labels[i] = int(result) + r
+    
+    good_answer = random.randint(0, 3)
+    SetGoodAnswer(good_answer)
+    butt_labels[good_answer] = result
+    
+    for i in range(4):    
+        document[buttons[i]].value = butt_labels[i]
+    
+    return True
+
+def TrueGenTest():
+    while not GenTest():
+        break
+    return
+
+def TestResult(num):
+    good_answer = int(GetGoodAnswer())
+    s_res = "Неверно"
+    if good_answer == num:
+        s_res = "Верно"
+    
+    AddToResult(GetCode(), document[buttons[num]].value, s_res)
+    
+    TrueGenTest()
+    return
+
+def show_values0(event):
+    TestResult(0)
+    return
+
+def show_values1(event):
+    TestResult(1)
+    return
+
+def show_values2(event):
+    TestResult(2)
+    return
+
+def show_values3(event):
+    TestResult(3)
+    return
+
+document[buttons[0]].bind("click", show_values0)
+document[buttons[1]].bind("click", show_values1)
+document[buttons[2]].bind("click", show_values2)
+document[buttons[3]].bind("click", show_values3)
+
+TrueGenTest()
+
+</script>
+
+<p >
+
+</p>
+
+</body>
+
+</html>
+
+
