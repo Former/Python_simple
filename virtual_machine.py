@@ -1,11 +1,11 @@
 # Copyright 2022 by Alexei Bezborodov <AlexeiBv@narod.ru>
 
 # reg[0] = reg[0] * 0
-mem1 = (2 << 28) | (2 << 24) | (0 << 20) | (0 << 16) | (0xF << 12) | (0)
+mem1 = (3 << 28) | (2 << 24) | (0 << 20) | (0 << 16) | (0xF << 12) | (0)
 # reg_prog_index = reg[0]
 mem2 = (1 << 28)
 
-mem = [mem1, mem2] + [0] * 100;
+mem = [mem1, mem2] + [0] * 98;
 reg_prog_index = 0 # IP
 reg = [10] * 16 # reg[0], reg[0]
 
@@ -36,36 +36,29 @@ def ExecuteOneCommand():
     op_math = (cur_instuction & (0xF << 24)) >> 24
     op_type = (cur_instuction & (0xF << 28)) >> 28
     number = cur_instuction & (0xFFF)
-
+    
     if op_type == 0:
         Noop()
     elif op_type == 1:
-        reg_prog_index = reg[0]
+        reg_prog_index = reg[0] # goto
     elif op_type == 2:
-        if op_math == 0:
-            if reg3_number == 15:
-                reg[reg1_number] = reg[reg2_number] + number
-            else:
-                reg[reg1_number] = reg[reg2_number] + reg[reg3_number]
-        elif op_math == 1:
-            if reg3_number == 15:
-                reg[reg1_number] = reg[reg2_number] - number
-            else:
-                reg[reg1_number] = reg[reg2_number] - reg[reg3_number]
-        elif op_math == 2:
-            if reg3_number == 15:
-                reg[reg1_number] = reg[reg2_number] * number
-            else:
-                reg[reg1_number] = reg[reg2_number] * reg[reg3_number]
-        elif op_math == 3:
-            if reg3_number == 15:
-                reg[reg1_number] = reg[reg2_number] / number
-            else:
-                reg[reg1_number] = reg[reg2_number] / reg[reg3_number]
+        reg[0] = reg_prog_index
     elif op_type == 3:
-        mem[reg[reg1_number]] = reg[reg2_number]
+        list_math_op = ["+", "-", "*", "/", ">", "<", "==", ">=", "<="]
+        
+        elem3 = "reg[reg3_number]"
+        if reg3_number == 15:
+           elem3 = "number"
+        
+        code = "reg[reg2_number]" + list_math_op[op_math] + elem3
+        reg[reg1_number] = eval(code)
     elif op_type == 4:
+        mem[reg[reg1_number]] = reg[reg2_number]
+    elif op_type == 5:
         reg[reg1_number] = mem[reg[reg2_number]]
+    elif op_type == 6:
+        if not reg[0] == 1:
+            reg_prog_index += 1
 
     reg_prog_index += 1
     return
@@ -75,7 +68,6 @@ for i in range(100):
     print("reg_prog_index =", reg_prog_index)
     print("reg =", reg)
     ExecuteOneCommand()
-    
     
 ''' 
 DEBUG
