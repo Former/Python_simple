@@ -1,8 +1,9 @@
 <!-- Copyright 2022 by Alexei Bezborodov <AlexeiBv@narod.ru> -->
-<!DOCTYPE html>
-<html>
+
+<html lang="ru">
 
 <head>
+<meta charset="UTF-8">
 <title>Расстановка по столам</title>
 
 <!--
@@ -18,7 +19,7 @@
 
 <body onload="brython()">
 
-<details>
+<details open>
     <summary>Начальные данные</summary>
     <div>
         <label>Входные данные:<br/></label>
@@ -40,17 +41,28 @@
         <button id="load_data">Загрузить</button>
     </div>
 </details>
-<details open>
+<details>
     <summary>Расстановка</summary>
     <div>
+        <p>
         <label>Количество столов:</label>
         <input id = "table_count" type="number" value="10" step="1" />
+        </p>
+        <p>
         <label>Количество мест за столом:</label>
         <input id = "table_size_count" type="number" value="5" step="1" />
-        <p id="result_table" class="text-center"></p>
+        </p>
+        <textarea id="result_table_txt" cols="40" rows="5"></textarea>
     </div>
     <div>
         <button id="table_distrib">Расставить по столам</button>
+        <button id="table_distrib_load">Загрузить расстановку</button>
+    </div>
+</details>
+<details>
+    <summary>Таблица</summary>
+    <div>
+        <p id="result_table" class="text-center"></p>
     </div>
 </details>
 <details>
@@ -116,6 +128,7 @@ def load_input(val):
                 cur_meet_list = cur_meet_list | {int(s)}
         p = Person(cur_beig_id,cur_name, cur_meet_list)
         persons.append(p)
+    persons = sorted(persons, key=lambda person: len(person.meet_set))    
 
 def show_meet_table_data():
     global persons
@@ -125,12 +138,12 @@ def show_meet_table_data():
     html += "<tr>"
     html += "<td></td>"
     for p in persons:
-        html += "<th>" + str(p.beig_id) + "</th>"
+        html += "<th" + " title="+ p.name + ">" + str(p.beig_id) + "</th>"
     html += "</tr>"
     # Остальные строки
     for p in persons:
         html += "<tr>"
-        html += "<th>" + str(p.beig_id) + "</th>"
+        html += "<th" + " title="+ p.name + ">" + str(p.beig_id) + "</th>"
         for ip in persons:
             if p.beig_id in ip.meet_set:
                 html += "<td bgcolor='red'></td>"
@@ -144,7 +157,10 @@ def get_result():
     global persons
     result = ""
     for p in persons:
-        result += str(p.beig_id) + ";" + p.name + ";" + str(p.meet_set) + "\n"
+        result += str(p.beig_id) + ";" + p.name + ";"
+        if len(p.meet_set):
+            result += str(p.meet_set)
+        result += "\n"
     return result
 
 def print_result_table():
@@ -162,10 +178,22 @@ def print_result_table():
     for t in tables:
         html += "<tr>"
         html += "<td>" + str(table_names[t.id]) + "</td>"
-        html += "<td>" + str(t.person_set) + "</td>"
+        if len(t.person_set):
+            html += "<td>" + str(t.person_set) + "</td>"
+        else:
+            html += "<td></td>"
         html += "</tr>"
     html += "</table>"
     document["result_table"].innerHTML = html
+
+    result_txt = ""
+    for t in tables:
+        result_txt += str(t.id) + ";"
+        if len(t.person_set):
+            result_txt += str(t.person_set)
+        result_txt += "\n"
+    
+    document["result_table_txt"].value = result_txt
 
 def get_person_by_id(id):
     global persons
@@ -218,7 +246,6 @@ def get_beig_id_set():
         result = result | {p.beig_id}
     return result
 
-
 def fill_tables():
     global persons
     global tables
@@ -237,7 +264,7 @@ def fill_tables():
         
         new_person_id = 0
         while True:
-            new_person_id = random.sample(beig_id_set, 1)[0]
+            new_person_id = random.sample(list(beig_id_set), 1)[0]
             if new_person_id not in persons_set:
                 break
         
@@ -254,6 +281,25 @@ def fill_persons():
             if p.beig_id in t.person_set:
                 p.meet_set = t.person_set | p.meet_set
 
+def load_input_table(val):
+    global tables
+    tables = []
+    input_data = val
+    for t in input_data.split("\n"):
+        if t == "":
+            continue
+        tmp = t.split(";")
+        cur_id = int(tmp[0])
+        str_meet_list = []
+        if len(tmp) > 1:
+            str_meet_list = tmp[1].replace(" ", "").replace("{", "").replace("}", "").split(",")
+        cur_meet_list = set()
+        for s in str_meet_list:
+            if len(s) != 0:
+                cur_meet_list = cur_meet_list | {int(s)}
+        t = Table(cur_id, cur_meet_list)
+        tables.append(t)    
+
 def make_result():
     fill_tables()
     fill_persons()
@@ -268,12 +314,19 @@ def table_distrib(event):
     print_result_table()
     document["output_data"].value = get_result() 
 
+def table_distrib_load(event):
+    load_data(event)
+    load_input_table(document["result_table_txt"].value)
+    fill_persons()
+    document["output_data"].value = get_result() 
+
 def load_to_start_data(event):
     document["input_data"].value = document["output_data"].value
 
 document["load_data"].bind("click", load_data)
 document["table_distrib"].bind("click", table_distrib)
 document["load_to_start_data"].bind("click", load_to_start_data)
+document["table_distrib_load"].bind("click", table_distrib_load)
 
 </script>
 
