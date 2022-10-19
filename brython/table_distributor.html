@@ -1,0 +1,282 @@
+<!-- Copyright 2022 by Alexei Bezborodov <AlexeiBv@narod.ru> -->
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Расстановка по столам</title>
+
+<!--
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.8.9/brython.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.8.9/brython_stdlib.js"></script>
+-->
+
+<script type="text/javascript" src="brython.min.js"></script>
+<script type="text/javascript" src="brython_stdlib.js"></script>
+
+
+</head>
+
+<body onload="brython()">
+
+<details>
+    <summary>Начальные данные</summary>
+    <div>
+        <label>Входные данные:<br/></label>
+        <textarea id="input_data" cols="40" rows="5"></textarea>
+        <p>Данные должны быть в таком формате:<br/>
+        1; Name1; {3,4}<br/>
+        2; Name2; {3,4}<br/>
+        3; Name3; {1,2}<br/>
+        4; Name4; {1,2}<br/>
+        , где первое число - номер посетителя<br/>
+        второе - имя посетителя<br/>
+        третье - номера участников, с которыми посетитель уже знаком<br/>
+        </p>
+    </div>
+    <div>
+        <p id="meet_table" class="text-center"></p>
+    </div>
+    <div>
+        <button id="load_data">Загрузить</button>
+    </div>
+</details>
+<details open>
+    <summary>Расстановка</summary>
+    <div>
+        <label>Количество столов:</label>
+        <input id = "table_count" type="number" value="10" step="1" />
+        <label>Количество мест за столом:</label>
+        <input id = "table_size_count" type="number" value="5" step="1" />
+        <p id="result_table" class="text-center"></p>
+    </div>
+    <div>
+        <button id="table_distrib">Расставить по столам</button>
+    </div>
+</details>
+<details>
+    <summary>Конечные данные</summary>
+    <label>Входные данные:<br/></label>
+    <textarea id="output_data" cols="40" rows="5"></textarea>
+    <div>
+        <button id="load_to_start_data">Скопировать во входные данные</button>
+    </div>
+</details>
+
+
+<script type="text/python">
+
+from browser import document, html, window
+import random
+
+class Table:
+    def __init__(self, id, person_set):
+        self.id = id
+        self.person_set = person_set
+
+    id = 0
+    person_set = set()
+
+class Person:
+    def __init__(self, beig_id, name, meet_set):
+        self.beig_id = beig_id
+        self.name = name
+        self.meet_set = meet_set
+    
+    def __str__(self):
+        return str(self.beig_id) + ", " + self.name + "\n" + str(self.meet_set)
+    
+    beig_id = 0
+    name = ""
+    meet_set = set()
+
+global persons
+persons = []
+
+global tables
+tables = []
+
+def load_input(val):
+    global persons
+    persons = []
+    input_data = val
+    for p in input_data.split("\n"):
+        if p == "":
+            continue
+        tmp = p.split(";")
+        cur_beig_id = int(tmp[0])
+        cur_name = ""
+        if len(tmp) > 1:
+            cur_name = tmp[1]
+        str_meet_list = []
+        if len(tmp) > 2:
+            str_meet_list = tmp[2].replace(" ", "").replace("{", "").replace("}", "").split(",")
+        cur_meet_list = set()
+        for s in str_meet_list:
+            if len(s) != 0:
+                cur_meet_list = cur_meet_list | {int(s)}
+        p = Person(cur_beig_id,cur_name, cur_meet_list)
+        persons.append(p)
+
+def show_meet_table_data():
+    global persons
+    html = ""
+    html += "<table border = 1>"
+    # Первая строка
+    html += "<tr>"
+    html += "<td></td>"
+    for p in persons:
+        html += "<th>" + str(p.beig_id) + "</th>"
+    html += "</tr>"
+    # Остальные строки
+    for p in persons:
+        html += "<tr>"
+        html += "<th>" + str(p.beig_id) + "</th>"
+        for ip in persons:
+            if p.beig_id in ip.meet_set:
+                html += "<td bgcolor='red'></td>"
+            else:
+                html += "<td></td>"
+        html += "</tr>"
+    html += "</table>"
+    document["meet_table"].innerHTML = html
+
+def get_result():
+    global persons
+    result = ""
+    for p in persons:
+        result += str(p.beig_id) + ";" + p.name + ";" + str(p.meet_set) + "\n"
+    return result
+
+def print_result_table():
+    table_names = "АБВГДЕЖЗИКЛМНОПРСТУФ"
+    
+    global tables
+    html = ""
+    html += "<table border = 1>"
+    # Первая строка
+    html += "<tr>"
+    html += "<th>Номер стола</th>"
+    html += "<th>Участники</th>"
+    html += "</tr>"
+    # Остальные строки
+    for t in tables:
+        html += "<tr>"
+        html += "<td>" + str(table_names[t.id]) + "</td>"
+        html += "<td>" + str(t.person_set) + "</td>"
+        html += "</tr>"
+    html += "</table>"
+    document["result_table"].innerHTML = html
+
+def get_person_by_id(id):
+    global persons
+    for p in persons:
+        if p.beig_id == id:
+            return p
+    print("Error", id)
+
+def fill_next_table(start_person_id, persons_set, table_size_count):
+    global persons
+    
+    result_persons = [get_person_by_id(start_person_id)]
+    result_set = {start_person_id}
+    
+    while(len(result_set) < table_size_count):
+        search_succes = False
+        for p in persons:
+            cur_id = p.beig_id
+            if cur_id in persons_set:
+                continue
+            if cur_id in result_set:
+                continue
+            pers_free = True
+            for ip in result_persons:
+                if cur_id in ip.meet_set:
+                    pers_free = False
+                    break
+            if pers_free:
+                result_set = result_set | {cur_id}
+                result_persons.append(p)
+                search_succes = True
+                break
+        
+        if not search_succes:
+            for p in persons:
+                cur_id = p.beig_id
+                if cur_id in persons_set:
+                    continue
+                if cur_id in result_set:
+                    continue
+                result_set = result_set | {cur_id}
+                result_persons.append(p)
+                break
+    
+    return result_set
+
+def get_beig_id_set():
+    result = set()
+    for p in persons:
+        result = result | {p.beig_id}
+    return result
+
+
+def fill_tables():
+    global persons
+    global tables
+    tables = []
+    cur_table_id = 0
+
+    table_count = int(document["table_count"].value)
+    table_size_count = int(document["table_size_count"].value)
+    
+    beig_id_set = get_beig_id_set()
+
+    persons_set = set()
+    while True:
+        if (len(persons_set) == len(persons)) or (len(persons_set) == (table_count * table_size_count)):
+            break
+        
+        new_person_id = 0
+        while True:
+            new_person_id = random.sample(beig_id_set, 1)[0]
+            if new_person_id not in persons_set:
+                break
+        
+        cur_set = fill_next_table(new_person_id, persons_set, min(table_size_count, len(persons) - len(persons_set)))
+        persons_set = persons_set | cur_set
+        tables.append(Table(cur_table_id, cur_set))
+        cur_table_id += 1
+
+def fill_persons():
+    global persons
+    global tables
+    for t in tables:        
+        for p in persons:
+            if p.beig_id in t.person_set:
+                p.meet_set = t.person_set | p.meet_set
+
+def make_result():
+    fill_tables()
+    fill_persons()
+
+def load_data(event):
+    load_input(document["input_data"].value)
+    show_meet_table_data()
+
+def table_distrib(event):
+    load_data(event)
+    make_result()
+    print_result_table()
+    document["output_data"].value = get_result() 
+
+def load_to_start_data(event):
+    document["input_data"].value = document["output_data"].value
+
+document["load_data"].bind("click", load_data)
+document["table_distrib"].bind("click", table_distrib)
+document["load_to_start_data"].bind("click", load_to_start_data)
+
+</script>
+
+</body>
+
+</html>
