@@ -109,7 +109,7 @@ def ReplaceRandInt(code):
 
 def ReplaceRandMath(code):
     math_op = ["+", "-", "*", "/", "%"]
-    return code.replace("@rand_math", math_op[random.randint(0, len(math_op))], 1)
+    return code.replace("@rand_math", math_op[random.randint(0, len(math_op) - 1)], 1)
 
 def PrepareTemplate(code_template):
     code = code_template
@@ -128,7 +128,7 @@ def PrepareTemplate(code_template):
 
 def GetTemplate():
     global g_CodeTemplates
-    template = g_CodeTemplates[random.randint(0, len(g_CodeTemplates))]
+    template = g_CodeTemplates[random.randint(0, len(g_CodeTemplates) - 1)]
     return template
 
 def GenTest():    
@@ -149,12 +149,15 @@ def GenTest():
     result = GetPrintResult()
     CleanPrint()
     
-    butt_labels = [""] * 4
-    for i in range(4):
-        r = random.randint(-5, 5)
-        if r == 0:
-            r = 1
-        butt_labels[i] = int(result) + r
+    try:
+        butt_labels = [""] * 4
+        for i in range(4):
+            r = random.randint(-5, 5)
+            if r == 0:
+                r = 1
+            butt_labels[i] = int(result) + r
+    except SyntaxError:
+        return False
     
     good_answer = random.randint(0, 3)
     SetGoodAnswer(good_answer)
@@ -166,8 +169,9 @@ def GenTest():
     return True
 
 def TrueGenTest():
-    while not GenTest():
-        break
+    for i in range(10):
+        if GenTest():
+            break
     return
 
 def TestResult(num):
