@@ -44,13 +44,16 @@ buttons = ["button_1", "button_2", "button_3", "button_4"]
 
 global g_CodeTemplates
 g_CodeTemplates = [
-"print(@rand_int)",
-"print(@rand_int @rand_math @rand_int)",
-"print(@rand_int @rand_math @rand_int @rand_math @rand_int)",
-"print(@rand_int @rand_math (@rand_int @rand_math @rand_int))",
-"print((@rand_int @rand_math @rand_int) @rand_math @rand_int)",
-"x = @rand_int\nprint(x)",
-"x = @rand_int\nfor i in range(@rand_int):\n\tx += i\nprint(x)"
+#"print(@rand_int)",
+#"print(@rand_int @rand_math @rand_int)",
+#"print(@rand_int @rand_math @rand_int @rand_math @rand_int)",
+#"print(@rand_int @rand_math (@rand_int @rand_math @rand_int))",
+#"print((@rand_int @rand_math @rand_int) @rand_math @rand_int)",
+#"x = @rand_int\nprint(x)",
+#"x = @rand_int\nfor i in range(@rand_int):\n\tx += i\nprint(x)"
+"x = @rand_int\nif x @rand_cond @rand_int:\n\tprint(1)\nelse:\n\tprint(0)",
+"x = @rand_int\nif x @rand_cond @rand_int @rand_bool_op x @rand_cond @rand_int:\n\tprint(1)\nelse:\n\tprint(0)",
+"s = @rand_int\nfor i in range(@rand_int):\n\tif i @rand_cond @rand_int:\n\t\ts += i\nprint(s)"
 ]
 
 global g_Result
@@ -108,23 +111,29 @@ def ReplaceRandInt(code):
     return code.replace("@rand_int", str(random.randint(-15, 15)), 1)
 
 def ReplaceRandMath(code):
-    math_op = ["+", "-", "*", "/", "%"]
+    math_op = ["+", "-", "*", "/", "%", "**"]
     return code.replace("@rand_math", math_op[random.randint(0, len(math_op) - 1)], 1)
+
+def ReplaceRandCond(code):
+    cond_op = [">", "<", "<=", ">=", "==", "!="]
+    return code.replace("@rand_cond", cond_op[random.randint(0, len(cond_op) - 1)], 1)
+
+def ReplaceRandBoolOp(code):
+    cur_op = ["and", "or", "not"]
+    return code.replace("@rand_bool_op", cur_op[random.randint(0, len(cur_op) - 1)], 1)
 
 def PrepareTemplate(code_template):
     code = code_template
+    ops = [ReplaceRandInt, ReplaceRandMath, ReplaceRandCond, ReplaceRandBoolOp]
 
-    new_code = ReplaceRandInt(code)
-    while code != new_code:
-        code = new_code
-        new_code = ReplaceRandInt(code)
+    new_code = code
+    for o in ops:
+        new_code = o(code)
+        while code != new_code:
+            code = new_code
+            new_code = o(code)
 
-    new_code = ReplaceRandMath(code)
-    while code != new_code:
-        code = new_code
-        new_code = ReplaceRandMath(code)
-    
-    return code
+    return new_code
 
 def GetTemplate():
     global g_CodeTemplates
