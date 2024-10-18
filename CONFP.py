@@ -2,6 +2,7 @@
 # License: Public domain: http://unlicense.org/
 
 # CONFP Конфиг для настроек в одну функцию (Config ONe Function Parse)
+# Позволяет парсить конфигурационный файлы любой сложности. Реализуется в одну функцию
 
 def CONFP_Parse(a_StrToParse):
 
@@ -21,7 +22,7 @@ def CONFP_Parse(a_StrToParse):
         param_value_trim = param_value.strip()
         if len(param_name_trim) == 0 and len(param_value_trim) == 0:
             return
-        cur_value = result.get(param_name)
+        cur_value = result.get(param_name_trim)
         if cur_value:
             if type(cur_value) == str:
                 cur_value = [cur_value]
@@ -72,6 +73,24 @@ def CONFP_Parse(a_StrToParse):
 
     return result
 
+def CONFP_GetValue(a_ParseResult, a_Key, a_DefaultValue):
+    val = a_ParseResult.get(a_Key)
+    if not val:
+        return a_DefaultValue
+    return val
+
+def CONFP_GetIntValue(a_ParseResult, a_Key, a_DefaultIntValue):
+    val = a_ParseResult.get(a_Key)
+    if not val:
+        return a_DefaultIntValue
+    return int(val)
+
+def CONFP_GetFloatValue(a_ParseResult, a_Key, a_DefaultFloatValue):
+    val = a_ParseResult.get(a_Key)
+    if not val:
+        return a_DefaultFloatValue
+    return float(val)
+
 def Test():
     conf0 = "val=1"
     conf1 = "val=1;"
@@ -84,10 +103,101 @@ def Test():
     val2 = 2
     val3 = Hello
     """
+    conf5 = "val={1}"
+    conf6 = "val={1};"
+    conf7 = conf6*5
+    conf8 = """ val1=1
+    val2=2
+    val3={Hello}
+    """
+    conf9 = """ val1 = 1
+    val2 = 2
+    val3 = {Hello}
+    """
+    conf10 = """val={
+    1
+    }"""
+    conf11 = """val={
+    1
+    };"""
+    conf12 = conf11*5
+    conf13 = """val={
+    {1}
+    }"""
+    conf14 = """val={
+    {1}
+    };"""
+    conf15 = conf14*5
     assert {"val":"1"} == CONFP_Parse(conf0)
     assert {"val":"1"} == CONFP_Parse(conf1)
     assert {"val":["1"]*5} == CONFP_Parse(conf2)
-    assert {"val1":"1", "val2":"2", "val3":"Hello"} == CONFP_Parse(conf3), CONFP_Parse(conf3)
+    assert {"val1":"1", "val2":"2", "val3":"Hello"} == CONFP_Parse(conf3)
     assert {"val1":"1", "val2":"2", "val3":"Hello"} == CONFP_Parse(conf4)
+    assert {"val":"1"} == CONFP_Parse(conf5)
+    assert {"val":"1"} == CONFP_Parse(conf6)
+    assert {"val":["1"]*5} == CONFP_Parse(conf7)
+    assert {"val1":"1", "val2":"2", "val3":"Hello"} == CONFP_Parse(conf8)
+    assert {"val1":"1", "val2":"2", "val3":"Hello"} == CONFP_Parse(conf9)
+    assert {"val":"1"} == CONFP_Parse(conf10)
+    assert {"val":"1"} == CONFP_Parse(conf11)
+    assert {"val":["1"]*5} == CONFP_Parse(conf12)
+    assert {"val":"{1}"} == CONFP_Parse(conf13)
+    assert {"val":"{1}"} == CONFP_Parse(conf14)
+    assert {"val":["{1}"]*5} == CONFP_Parse(conf15), CONFP_Parse(conf15)
+
+    conf16 = """
+    ver=0.1.0
+    data="test"
+    complex1={
+        name = test1;
+        complex2 = {
+            name = test2
+        }
+        complex2 = {
+            name = test3;
+        }
+    }
+    """
+    assert "0.1.0" == CONFP_Parse(conf16).get("ver")
+    assert '"test"' == CONFP_Parse(conf16).get("data")
+    assert "test1" == CONFP_Parse(CONFP_Parse(conf16).get("complex1")).get("name")
+    assert "test2" == CONFP_Parse(CONFP_Parse(CONFP_Parse(conf16).get("complex1")).get("complex2")[0]).get("name")
+    assert "test3" == CONFP_Parse(CONFP_Parse(CONFP_Parse(conf16).get("complex1")).get("complex2")[1]).get("name")
+
+    conf17 = """
+    ver=0.1.0
+    int1=-50
+    int2=123
+    int3 = 0
+    float1=-5.0
+    float2=12.3
+    float3 = .0
+    complex1={
+        int1=-50
+        float1=-5.0
+    }
+    complex1={
+        int1=-150
+        float1 = .0
+    }
+    """
+    parse17 = CONFP_Parse(conf17)
+    assert "0.1.0" == CONFP_GetValue(parse17, "ver", "")
+    assert 10 == CONFP_GetIntValue(parse17, "int", 10)
+    assert -50 == CONFP_GetIntValue(parse17, "int1", 0)
+    assert 123 == CONFP_GetIntValue(parse17, "int2", 0)
+    assert 0 == CONFP_GetIntValue(parse17, "int3", 10)
+    assert 10.0 == CONFP_GetFloatValue(parse17, "float", 10.0)
+    assert -5.0 == CONFP_GetFloatValue(parse17, "float1", 0.0)
+    assert 12.3 == CONFP_GetFloatValue(parse17, "float2", 0.0)
+    assert 0.0 == CONFP_GetFloatValue(parse17, "float3", 10.0)
+    parse17_complex = CONFP_GetValue(parse17, "complex1", [])
+    parse17_0 = CONFP_Parse(parse17_complex[0])
+    parse17_1 = CONFP_Parse(parse17_complex[1])
+    assert -50 == CONFP_GetIntValue(parse17_0, "int1", 10)
+    assert -5.0 == CONFP_GetFloatValue(parse17_0, "float1", 10)
+    assert -150 == CONFP_GetIntValue(parse17_1, "int1", 10)
+    assert 0.0 == CONFP_GetFloatValue(parse17_1, "float1", 10)
 
 Test()
+
