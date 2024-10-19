@@ -1,5 +1,6 @@
 # Copyright © 2024 Alexei Bezborodov. Contacts: <AlexeiBv+CONFP_py@narod.ru>
 # License: Public domain: http://unlicense.org/
+# Original - https://github.com/Former/Python_simple/blob/main/CONFP.py
 
 # CONFP Конфиг для настроек в одну функцию (Config ONe Function Parse)
 # Позволяет парсить конфигурационный файлы любой сложности. Реализуется в одну функцию
