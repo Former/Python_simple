@@ -91,6 +91,12 @@ def CONFP_GetFloatValue(a_ParseResult, a_Key, a_DefaultFloatValue):
         return a_DefaultFloatValue
     return float(val)
 
+def CONFP_GetArrayValue(a_ParseResult, a_Key, a_DefaultArrayValue):
+    val = CONFP_GetValue(a_ParseResult, a_Key, a_DefaultArrayValue)
+    if type(val) == str:
+        return [val]
+    return val
+
 def Test():
     conf0 = "val=1"
     conf1 = "val=1;"
@@ -143,7 +149,12 @@ def Test():
     assert {"val":["1"]*5} == CONFP_Parse(conf12)
     assert {"val":"{1}"} == CONFP_Parse(conf13)
     assert {"val":"{1}"} == CONFP_Parse(conf14)
-    assert {"val":["{1}"]*5} == CONFP_Parse(conf15), CONFP_Parse(conf15)
+    assert ["{1}"] == CONFP_GetArrayValue(CONFP_Parse(conf14), "val", [])
+    assert [] == CONFP_GetArrayValue(CONFP_Parse(conf14), "val1", [])
+
+    assert {"val":["{1}"]*5} == CONFP_Parse(conf15)
+    assert ["{1}"]*5 == CONFP_GetArrayValue(CONFP_Parse(conf15), "val", [])
+
 
     conf16 = """
     ver=0.1.0
