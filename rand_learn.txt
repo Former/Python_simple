@@ -1,0 +1,39 @@
+s = "1 + 1 = 2"
+s = s.replace("1", "один")
+s = s.replace("2", "два")
+s = s.replace("3", "три")
+s = s.replace("4", "четыре")
+print(s)
+
+
+
+exit()
+import random
+
+a = 1323
+def rand():
+    global a
+    a = (a * 234 + 234235) % 1000
+    return a
+
+
+for i in range(20):
+    #print(random.randint(1, 10))
+    print(rand())
+
+
+
+exit()
+s = "@rand_int + @rand_int"
+
+print(s.replace("@rand_int", str(random.randint(-15, 15)), 1))
+
+exit()
+def full_replace(s):
+    c = None
+    while c != s:
+        c = s
+        s = s.replace("@rand_int", str(random.randint(-15, 15)), 1)
+    return s
+
+print(full_replace(s))

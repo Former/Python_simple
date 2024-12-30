@@ -1,0 +1,72 @@
+<!-- Copyright 2024 by Alexei Bezborodov <AlexeiBv@narod.ru> -->
+<!-- License: Public domain: http://unlicense.org/ -->
+<!-- Общественное достояние -->
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Фрактал SVG</title>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.8.9/brython.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.8.9/brython_stdlib.js"></script>
+</head>
+<body onload="brython()">
+
+<h1 class="text-center">Фрактал SVG</h1>
+<p id="out_svg"></p>
+
+<script type="text/python">
+
+from browser import document, html, window
+
+def Print2String(*args, **kwargs):
+    newstr = ""
+    for a in args:
+        newstr += str(a) + ''
+    return newstr
+
+color_black = "black"
+color_test_rgb = "rgb(100,255,0)"
+
+def SvgDrawRect(svg, x, y, width, height, color, line_color, line_width):
+    svg += [Print2String("<rect x='",x,"' y='",y,"' width='", width,"' height='", height,"' style=\"fill:",color,";stroke-width:",line_width,";stroke:",line_color,"\" />")]
+    
+def SvgDrawLine(svg, x1, y1, x2, y2, color, width):
+    svg += [Print2String("<line x1='",x1,"' y1='", y1,"' x2='",x2,"' y2='",y2,"' style=\"stroke:",color,";stroke-width:",width,"\" />")]
+
+def SvgMake(svg, width, height):
+    result = Print2String("<svg width='",width,"' height='",height,"' xmlns=\"http://www.w3.org/2000/svg\" xmlns:svg=\"http://www.w3.org/2000/svg\">")
+    for c in svg:
+        result += c
+    result += "</svg>"
+    return result
+
+def SvgDrawSquare(svg, x1, y1, x2, y2, x3, y3, x4, y4, color, width):
+    SvgDrawLine(svg, x1, y1, x2, y2, color, width)
+    SvgDrawLine(svg, x2, y2, x3, y3, color, width)
+    SvgDrawLine(svg, x3, y3, x4, y4, color, width)
+    SvgDrawLine(svg, x1, y1, x4, y4, color, width)
+
+def SvgDrawSquareFractal(svg, x1, y1, x2, y2, x3, y3, x4, y4, color, width, dep):
+    if dep < 1:
+        return
+    SvgDrawSquare(svg, x1, y1, x2, y2, x3, y3, x4, y4, color, width)
+
+    koef = 0.15
+    SvgDrawSquareFractal(svg, x1 + (x2 - x1) * koef, y1 + (y2 - y1) * koef, x2 + (x3 - x2) * koef, y2 + (y3 - y2) * koef, x3 + (x4 - x3) * koef, y3 + (y4 - y3) * koef, x4 + (x1 - x4) * koef, y4 + (y1 - y4) * koef, color, width, dep - 1)
+
+
+svg = []
+w = 500
+h = 500
+SvgDrawRect(svg, 0, 0, w, h, color_black, color_black, 1)
+
+SvgDrawSquareFractal(svg, 0, 0, w, 0, w , h, 0, h, color_test_rgb, 3, 37)
+
+document["out_svg"].innerHTML = SvgMake(svg, w, h)
+
+</script>
+
+</body>
+
+</html>
