@@ -1,0 +1,51 @@
+<!-- Copyright 2025 by Alexei Bezborodov <AlexeiBv@narod.ru> -->
+<!-- Public domain -->
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Простая доска на python с возможностью кликнуть</title>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.8.9/brython.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.8.9/brython_stdlib.js"></script>
+</head>
+<body onload="brython()">
+
+<p id="draw_table"></p>
+
+<script type="text/python">
+
+from browser import document, html, window
+
+w = 10
+h = 10
+board = [0] * w * h
+
+def Draw(board):
+    result_html = "<table border = 1>" 
+    for y in range(h):
+        result_html += "<tr>"
+        for x in range(w):
+            onclick = "OnClick("+ str(x) + "," + str(y) +")";
+            result_html += "<td onclick='" + onclick + "'>" + str(board[y * w + x]) + "</td>"
+        result_html += "</tr>"
+    result_html += "</table>"
+
+    document["draw_table"].innerHTML = result_html
+
+def OnClick(x, y):
+    board[y * w + x] += 1
+    Draw(board)
+
+window.OnClick = OnClick
+Draw(board)
+
+</script>
+
+</body>
+
+</html>
+
+
+
+
