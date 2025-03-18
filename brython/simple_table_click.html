@@ -26,7 +26,7 @@ def Draw(board):
     for y in range(h):
         result_html += "<tr>"
         for x in range(w):
-            onclick = "OnClick("+ str(x) + "," + str(y) +")";
+            onclick = "OnClick("+ str(x) + "," + str(y) +");";
             result_html += "<td onclick='" + onclick + "'>" + str(board[y * w + x]) + "</td>"
         result_html += "</tr>"
     result_html += "</table>"
