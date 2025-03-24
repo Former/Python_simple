@@ -1,8 +1,6 @@
 # Copyright © 2025 Alexei Bezborodov. Contacts: <AlexeiBv+xor3@narod.ru>
 # License: Public domain: http://unlicense.org/
 
-# В массиве встрчаются строго по 3 значения одинаковых, кроме одного - которое строго одно, например: 4,5,1,5,1,7,4,1,5,4. Найти его за o[n]/o(1)
-
 def to_base(n, base):
 	result = []
 	while n != 0:
@@ -35,6 +33,12 @@ def xor_for_base(n1, n2, base):
 		result[i] = (c1 + c2 ) % base
 
 	return join_base(result, base)
+
+def xor_array(a, base):
+	result = 0
+	for n in a:
+		result = xor_for_base(result, n, base)
+	return result
 	
 	
 def Test():
@@ -46,11 +50,18 @@ def Test():
 	assert xor_for_base(1, 7, 2) == 6
 	assert xor_for_base(3, xor_for_base(3, 3, 3), 3) == 0
 	
+	# В массиве встрчаются строго по 3 значения одинаковых, кроме одного - которое строго одно, например: 4,5,1,5,1,7,4,1,5,4. Найти его за o[n]/o(1)
 	d = [4,5,1,5,1,7,4,1,5,4]
-	result = 0
-	for n in d:
-		result = xor_for_base(result, n, 3)
-	assert result == 7, result
+	assert xor_array(d, 3) == 7
+
+	# В массиве встрчаются строго по 2,4,6... значения одинаковых, кроме двух, например: 4,5,4,5,10,7,10,7,1,2,4,4. Найти эти два значения (1,2) за o[n]/o(1)
+	d = [4,5,4,5,10,7,10,7,11,12] 
+	print(xor_array(d, 2))
+	print(xor_array(d * 2, 4))
+	print(xor_array(d * 3, 6))
+	print(xor_array(d * 4, 8))
+	assert xor_array(d * 2, 4) == 17*2, xor_array(d * 2, 4)
+    # Пока нет решения
 
 Test()
 

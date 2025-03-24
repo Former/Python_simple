@@ -1,0 +1,151 @@
+<!-- Copyright 2025 by Alexei Bezborodov <AlexeiBv+attentiveness_test@narod.ru> -->
+<!-- Public domain -->
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Тест на внимательность</title>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12/brython.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12/brython_stdlib.js"></script>
+</head>
+<body onload="brython()">
+
+<label for="fname">Ширина</label> <input type="number" id="input_width" value="5">
+<label for="fname">Высота</label> <input type="number" id="input_height" value="5">
+<button id="start_button">Запустить</button>
+
+<p id="draw_table"></p>
+
+<script type="text/python">
+
+from browser import document, html, window
+import random
+import time
+
+def GetDocValue(id):
+    return document[id].value
+
+global bad_click_count
+global cur_number
+global start_time
+global w
+global h
+global style
+global board
+
+style_good = "background-color:green;"
+style_good_after_bad = "background-color:yellow;"
+style_bad = "background-color:red;"
+style_init = "background-color:white;"
+
+# Заполнение поля
+def MakeBoard(board, w, h):
+    for i in range(1, h*w + 1):
+        zero_count = 0
+        cur_pos = 0
+        if w*h - i - 1 > 0:
+            cur_pos = random.randint(0,  w*h - i - 1)
+        j = 0
+        while zero_count < cur_pos + 1 and j < w*h:
+            if board[j] == 0:
+                zero_count += 1
+            j += 1
+        val = str(i)
+        if val.count("6") + val.count("9") == len(val):
+            val += "."
+        board[j - 1] = val
+
+def GetRandomTextStyle():
+    result = ""
+    result += "display: inline-block;"
+    result += "padding: 20px;"
+    result += style_init
+    result += "transform: rotate(" + str(random.randint(0, 360)) + "deg)"
+    return result
+
+def MakeRandomStyle(style, w, h):
+    for i in range(h*w):
+        style[i] = GetRandomTextStyle();
+
+def GetValue(array, x, y):
+    return array[y * w + x]
+def SetValue(array, new_value, x, y):
+    array[y * w + x] = new_value
+
+def CreateHTMLTable(onClickFiuncName, board, style, width, height):
+    result_html = "<table border = 1>" 
+    for y in range(height):
+        result_html += "<tr>"
+        for x in range(width):
+            onclick = onClickFiuncName + "("+ str(x) + "," + str(y) +");"
+            td_style = GetValue(style, x, y)
+            val = str(GetValue(board, x, y))
+            result_html += "<td onclick='" + onclick + "' style='" + td_style + "'>" + val + "</td>"
+        result_html += "</tr>"
+    result_html += "</table>"
+    return result_html
+
+def Draw():
+    global start_time
+    global board
+    global style
+    global w
+    global h
+    result = "Кликните по всем числам подряд 1,2,3...: "
+    result += "<br />"
+    result += CreateHTMLTable("OnClick", board, style, w , h);
+    result += "<br />"
+    result += "Прошло времени: " + str(time.time() - start_time)
+    result += "<br />"
+    result += "Ошибочных кликов: " + str(bad_click_count)
+    document["draw_table"].innerHTML = result
+
+def OnClick(x, y):
+    global bad_click_count
+    global cur_number
+    s = GetValue(style, x, y)
+    cur_click_number = int(GetValue(board, x, y).replace(".", ""))
+    if cur_number == cur_click_number:
+        s = s.replace(style_init, style_good)
+        s = s.replace(style_bad, style_good_after_bad)
+        cur_number += 1
+    else:
+        s = s.replace(style_init, style_bad)
+        bad_click_count += 1
+    SetValue(style, s, x, y)
+    Draw()
+
+window.OnClick = OnClick
+
+def Start(event):
+    global bad_click_count
+    global cur_number
+    global start_time
+    global w
+    global h
+    global style
+    global board
+
+    cur_number = 1
+    bad_click_count = 0
+    start_time = time.time()
+    w = int(GetDocValue("input_width"))
+    h = int(GetDocValue("input_height"))
+    style = [""] * (w * h)
+    board = [0] * (w * h)
+    MakeBoard(board, w, h)
+    MakeRandomStyle(style, w, h)
+    Draw()
+
+document["start_button"].bind("click", Start)
+
+</script>
+
+</body>
+
+</html>
+
+
+
+
