@@ -1,0 +1,108 @@
+<!-- Copyright 2025 by Alexei Bezborodov <AlexeiBv+wiki_timecode_maker@narod.ru>-->
+<!-- Public domain -->
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Генератор таймкодов для ВИКИ</title>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12/brython.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12/brython_stdlib.js"></script>
+</head>
+<body >
+
+<p id="out-text"></p>
+
+<div>
+Генератор таймкодов для ВИКИ <br>
+<textarea cols=80 rows=20 id="input_text">
+Пример формата входных данных:
+==Заголовок первого видео==
+ 
+https://rutube.ru/video/_____________
+https://www.youtube.com/watch?v=________
+0:10 Первый тайм код
+1:02:03 Второй тайм код
+2:20:03 Третий тайм код
+
+==Заголовок Второго видео==
+ 
+https://vkvideo.ru/video/_____________
+https://plvideo.ru/watch?v=_____________
+0:20 Первый тайм код
+1:21:33 Второй тайм код
+2:40:03 Третий тайм код
+</textarea>
+</div>
+<div>
+<button id="make_button">Преобразовать</button>
+</div>
+<div>
+<textarea cols=80 rows=20 id="result_text"> </textarea>
+</div>
+
+<script type="text/python">
+
+from browser import document, html, window
+
+def TimeCode_Maker(input_text):
+    n = '\n'
+    
+    lines = input_text.split(n)
+
+    cur_urls = []
+    out = ""
+    for line in lines:
+        if line[0:1] == '=':
+           cur_urls = []
+        
+        if line[0:4] == 'http':
+           cur_urls += [line.strip()]
+           continue
+
+        str_time = line[0: line.find(" ")]
+        str_desc = line[line.find(" ") + 1:]
+
+        times = str_time.split(":")
+
+        if len(times) == 0 or len(times) == 1:
+            out += line
+            out += n
+            continue
+
+        time = ''
+        time_seconds = 0
+        app_time = ['s', 'm', 'h']
+        rtimes = times[::-1]
+        for i in range(min(len(times), len(app_time))):
+            t = rtimes[i]
+            time = t + app_time[i] + time
+            time_seconds += int(t) * 60 ** i
+
+        out += '# '
+        for u in cur_urls:
+            splitter = "&"
+            t = time
+            if u.find("rutube") >= 0 or u.find("vkvideo") >= 0:
+                splitter = "?"
+                t = str(time_seconds)
+            out += '[[' + u + splitter + 't=' + t + ' ' + str_time + ']]'
+        out += ' ' + str_desc
+        out += n
+    return out
+
+
+def TimeCode_MakerEvent(event):
+    input_text = document["input_text"].value
+
+    document["result_text"].value = TimeCode_Maker(input_text)
+
+document["make_button"].bind("click", TimeCode_MakerEvent)
+
+</script>
+
+</body>
+
+</html>
+
+
