@@ -21,13 +21,13 @@
  
 https://rutube.ru/video/_____________
 https://www.youtube.com/watch?v=________
+https://vkvideo.ru/video/_____________
 0:10 Первый тайм код
 1:02:03 Второй тайм код
 2:20:03 Третий тайм код
 
-==Заголовок Второго видео==
+==Заголовок второго видео==
  
-https://vkvideo.ru/video/_____________
 https://plvideo.ru/watch?v=_____________
 0:20 Первый тайм код
 1:21:33 Второй тайм код
@@ -81,12 +81,25 @@ def TimeCode_Maker(input_text):
 
         out += '# '
         for u in cur_urls:
+            prefix = ""
             splitter = "&"
             t = time
-            if u.find("rutube") >= 0 or u.find("vkvideo") >= 0:
+            if u.find("rutube") >= 0:
+                prefix = "rt"
                 splitter = "?"
                 t = str(time_seconds)
-            out += '[[' + u + splitter + 't=' + t + ' ' + str_time + ']]'
+            elif u.find("vkvideo") >= 0:
+                prefix = "vk"
+                splitter = "?"
+                t = str(time_seconds)
+            elif u.find("youtube") >= 0:
+                prefix = "yt"
+            elif u.find("plvideo") >= 0:
+                prefix = "pl"
+            p = ""
+            if len(cur_urls) > 1:
+                p = prefix + "-"
+            out += '[[' + u + splitter + 't=' + t + ' ' + p + str_time + ']]'
         out += ' ' + str_desc
         out += n
     return out
