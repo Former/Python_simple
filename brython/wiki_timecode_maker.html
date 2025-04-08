@@ -80,6 +80,7 @@ def TimeCode_Maker(input_text):
             time_seconds += int(t) * 60 ** i
 
         out += '# '
+        start = True
         for u in cur_urls:
             prefix = ""
             splitter = "&"
@@ -97,9 +98,15 @@ def TimeCode_Maker(input_text):
             elif u.find("plvideo") >= 0:
                 prefix = "pl"
             p = ""
+            s_time = ""
+            if start:
+                s_time = str_time
             if len(cur_urls) > 1:
-                p = prefix + "-"
-            out += '[[' + u + splitter + 't=' + t + ' ' + p + str_time + ']]'
+                p = prefix
+                if len(s_time) > 0:
+                    p = " " + p
+            out += '[[' + u + splitter + 't=' + t + ' ' + s_time + p + ']]'
+            start = False
         out += ' ' + str_desc
         out += n
     return out
