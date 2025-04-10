@@ -109,7 +109,7 @@ def TimeCode_Maker(input_text):
             start = False
         out += ' ' + str_desc
         out += n
-    return out
+    return out + n + "<!--" + n + input_text + n + "-->"
 
 
 def TimeCode_MakerEvent(event):
