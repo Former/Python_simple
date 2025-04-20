@@ -74,10 +74,15 @@ def TimeCode_Maker(input_text):
         time_seconds = 0
         app_time = ['s', 'm', 'h']
         rtimes = times[::-1]
-        for i in range(min(len(times), len(app_time))):
-            t = rtimes[i]
-            time = t + app_time[i] + time
-            time_seconds += int(t) * 60 ** i
+        try:
+            for i in range(min(len(times), len(app_time))):
+                t = rtimes[i]
+                time = t + app_time[i] + time
+                time_seconds += int(t) * 60 ** i
+        except:
+            out += line
+            out += n
+            continue
 
         out += '# '
         start = True
