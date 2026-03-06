@@ -29,9 +29,34 @@ lines_3d = []
 def rand(n):
     return random.randint(0, n)
 
+def DrawLine(ctx, x1, y1, x2, y2, color, width):
+    ctx.strokeStyle = color
+    ctx.lineWidth = width
+    ctx.beginPath()
+    ctx.moveTo(x1, y1)
+    ctx.lineTo(x2, y2)
+    ctx.stroke()
+    return
+
 def Add3DLine(x1, y1, z1, x2, y2, z2, c, w):
     global lines_3d
     lines_3d += [[x1, y1, z1, x2, y2, z2, c, w]]
+
+def Add3DSquare(x1, y1, z1, x2, y2, z2, c, w):
+    Add3DLine(x1, y1, z1, x2, y1, z1, c, w)
+    Add3DLine(x1, y1, z1, x1, y2, z1, c, w)
+    Add3DLine(x2, y1, z1, x2, y2, z1, c, w)
+    Add3DLine(x1, y2, z1, x2, y2, z1, c, w)
+
+    Add3DLine(x1, y1, z2, x2, y1, z2, c, w)
+    Add3DLine(x1, y1, z2, x1, y2, z2, c, w)
+    Add3DLine(x2, y1, z2, x2, y2, z2, c, w)
+    Add3DLine(x1, y2, z2, x2, y2, z2, c, w)
+
+    Add3DLine(x1, y1, z1, x1, y1, z2, c, w)
+    Add3DLine(x1, y2, z1, x1, y2, z2, c, w)
+    Add3DLine(x2, y1, z1, x2, y1, z2, c, w)
+    Add3DLine(x2, y2, z1, x2, y2, z2, c, w)
 
 def init_lines_3d():
     [max_x, max_y, max_z] = [100.0] * 3
@@ -57,30 +82,7 @@ def init_lines_3d():
         x2, y2, z2 = x1 + a, y1 + a, z1 + a
         c = 'lime'
         w = rand(5)
-        Add3DLine(x1, y1, z1, x2, y1, z1, c, w)
-        Add3DLine(x1, y1, z1, x1, y2, z1, c, w)
-        Add3DLine(x2, y1, z1, x2, y2, z1, c, w)
-        Add3DLine(x1, y2, z1, x2, y2, z1, c, w)
-
-        Add3DLine(x1, y1, z2, x2, y1, z2, c, w)
-        Add3DLine(x1, y1, z2, x1, y2, z2, c, w)
-        Add3DLine(x2, y1, z2, x2, y2, z2, c, w)
-        Add3DLine(x1, y2, z2, x2, y2, z2, c, w)
-
-        Add3DLine(x1, y1, z1, x1, y1, z2, c, w)
-        Add3DLine(x1, y2, z1, x1, y2, z2, c, w)
-        Add3DLine(x2, y1, z1, x2, y1, z2, c, w)
-        Add3DLine(x2, y2, z1, x2, y2, z2, c, w)
-
-
-def DrawLine(ctx, x1, y1, x2, y2, color, width):
-    ctx.strokeStyle = color
-    ctx.lineWidth = width
-    ctx.beginPath()
-    ctx.moveTo(x1, y1)
-    ctx.lineTo(x2, y2)
-    ctx.stroke()
-    return
+        Add3DSquare(x1, y1, z1, x2, y2, z2, c, w)
 
 cur_x, cur_y = -100.0, 0.0
 
