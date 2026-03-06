@@ -1,0 +1,141 @@
+<!-- Copyright 2026 by Alexei Bezborodov <AlexeiBv+simple_3d@narod.ru>-->
+<!-- Public domain -->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Простая 3Д графика</title>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12/brython.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12/brython_stdlib.js"></script>
+</head>
+
+<body>
+<h1 class="text-center">Простая 3Д графика</h1>
+<canvas id="draw-board" width="500" height="500"></canvas>
+<p class="text-center">Управление при помощи стрелок</p>
+
+<p id="key_show" class="text-center"></p>
+
+<script type="text/python">
+
+from browser import document, html, window
+import random
+
+lines_3d = []
+
+def rand(n):
+    return random.randint(0, n)
+
+def Add3DLine(x1, y1, z1, x2, y2, z2, c, w):
+    global lines_3d
+    lines_3d += [[x1, y1, z1, x2, y2, z2, c, w]]
+
+def init_lines_3d():
+    [max_x, max_y, max_z] = [100.0] * 3
+    def val(m):
+        div = 10000
+        return rand(div) * m / div - m / 2
+
+    # Stars
+    for i in range(1000):
+        x = val(max_x)
+        y = val(max_y)
+        z = val(max_z)
+        c = 'white'
+        w = rand(5)
+        Add3DLine(x, y, z, x, y, z + w/5, c, w)
+
+    # Squares
+    for i in range(100):
+        x1 = val(max_x)
+        y1 = val(max_y)
+        z1 = val(max_z)
+        a = val(max_x / 5)
+        x2, y2, z2 = x1 + a, y1 + a, z1 + a
+        c = 'lime'
+        w = rand(5)
+        Add3DLine(x1, y1, z1, x2, y1, z1, c, w)
+        Add3DLine(x1, y1, z1, x1, y2, z1, c, w)
+        Add3DLine(x2, y1, z1, x2, y2, z1, c, w)
+        Add3DLine(x1, y2, z1, x2, y2, z1, c, w)
+
+        Add3DLine(x1, y1, z2, x2, y1, z2, c, w)
+        Add3DLine(x1, y1, z2, x1, y2, z2, c, w)
+        Add3DLine(x2, y1, z2, x2, y2, z2, c, w)
+        Add3DLine(x1, y2, z2, x2, y2, z2, c, w)
+
+        Add3DLine(x1, y1, z1, x1, y1, z2, c, w)
+        Add3DLine(x1, y2, z1, x1, y2, z2, c, w)
+        Add3DLine(x2, y1, z1, x2, y1, z2, c, w)
+        Add3DLine(x2, y2, z1, x2, y2, z2, c, w)
+
+
+def DrawLine(ctx, x1, y1, x2, y2, color, width):
+    ctx.strokeStyle = color
+    ctx.lineWidth = width
+    ctx.beginPath()
+    ctx.moveTo(x1, y1)
+    ctx.lineTo(x2, y2)
+    ctx.stroke()
+    return
+
+cur_x, cur_y = -100.0, 0.0
+
+def Game():
+    global cur_x, cur_y
+    canvas = document["draw-board"]
+    ctx = canvas.getContext("2d")
+
+    # Чёрный экран
+    ctx.fillStyle = "black"
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    def sign(a):
+        if a > 0:
+            return 1
+        else:
+            return -1
+
+    def ProjToLine(x, y):
+        scale = 300.0
+        if x <= 0.0:
+            return 10000.0 * sign(y)
+        return y / x * scale
+
+    for i in range(len(lines_3d)):
+        l = lines_3d[i]
+        x1, y1, z1 = l[0] - cur_x, l[1] - cur_y, l[2]
+        x2, y2, z2 = l[3] - cur_x, l[4] - cur_y, l[5]
+        c, w = l[6], l[7]
+        x2d1 = ProjToLine(x1, y1) + canvas.width / 2
+        y2d1 = ProjToLine(x1, z1) + canvas.height / 2
+        x2d2 = ProjToLine(x2, y2) + canvas.width / 2
+        y2d2 = ProjToLine(x2, z2) + canvas.height / 2
+        DrawLine(ctx, x2d1, y2d1, x2d2, y2d2, c, w)
+        #print(x2d1, y2d1, x2d2, y2d2, c, w)
+
+def key_push(evt):
+    global cur_x, cur_y
+    key = evt.keyCode
+    if key == 37:
+        cur_y -= .1
+    elif key == 38:
+        cur_x += .1
+    elif key == 39:
+        cur_y += .1
+    elif key == 40:
+        cur_x -= .1
+    else:
+        document["key_show"].innerHTML = "key = " + str(key)
+
+init_lines_3d()
+document.addEventListener("keydown", key_push)
+game_loop = window.setInterval(Game, 1000/10)
+
+</script>
+
+</body>
+
+</html>
