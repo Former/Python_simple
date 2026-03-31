@@ -12,10 +12,6 @@
 
 <p id="tests"></p>
 
-<!--
-<button id="start_button">Старт</button>
--->
-
 <script type="text/python">
 
 from browser import document, html, window
@@ -23,7 +19,7 @@ from browser import document, html, window
 tests_if = [
     [
         "Знак числа",
-        "Если число больше нуля, то выведите один, если меньше, то выведите минус один, если равно, то верните нуль.",
+        "Если число больше нуля, то выведите один, если меньше, то выведите минус один, если равно, то выведите нуль.",
         [
             ["10", "1"],
             ["-45", "-1"],
@@ -185,7 +181,8 @@ def RunTestButton(event, tn, test_num, test):
     c = 'red'
     if (n.strip() == good.strip()):
         c = 'green'
-    document[OutTestId(tn, test_num)].innerHTML = "<p style='color:" + c + ";'>" + n + "</p>"
+    #document[OutTestId(tn, test_num)].innerHTML = "<p bgcolor=" + c + ">" + n + "</p>"
+    document[OutTestId(tn, test_num)].innerHTML = "<p style='background-color:" + c + ";'>" + n + "</p>"
 
 global binds;
 binds = []
@@ -223,11 +220,28 @@ def GenTestsHTML():
             result += "<button id='" + RunButtonId(tn) + "'>Запустить</button>"
             result += "</div>"
             result += "<div>"
-            result += "<textarea id='" + InputCodeId(tn) + "' cols='40' rows='15'></textarea>"
+            result += "Код программы:"
             result += "</div>"
             result += "<div>"
-            result += "<textarea id='" + InputDataId(tn) + "' cols='20' rows='5'>" + task_tests[0][0] + "</textarea>"
-            result += "<textarea id='" + OutputDataId(tn) + "' cols='20' rows='5'></textarea>"
+            result += "<textarea id='" + InputCodeId(tn) + "' cols='80' rows='20'></textarea>"
+            result += "</div>"
+            result += "<div style='display: flex;'>"
+            result += "<div style='display: float;'>"
+            result += "<div>"
+            result += "Входные данные:"
+            result += "</div>"
+            result += "<div>"
+            result += "<textarea id='" + InputDataId(tn) + "' cols='40' rows='5'>" + task_tests[0][0] + "</textarea>"
+            result += "</div>"
+            result += "</div>"
+            result += "<div>"
+            result += "<div style='display: float;'>"
+            result += "Выходные данные:"
+            result += "</div>"
+            result += "<div>"
+            result += "<textarea id='" + OutputDataId(tn) + "' cols='40' rows='5'></textarea>"
+            result += "</div>"
+            result += "</div>"
             result += "</div>"
 
             def MakeRunButton(tn):
@@ -238,8 +252,8 @@ def GenTestsHTML():
             binds += [[RunButtonId(tn), MakeRunButton(tn)]]
 
             result += "<div>"
-            result += "<table border = 1>"
-            result += "<tr> <td>Входные данные</td> <td>Верное значение на выходе</td> <td>Текущее значение на выходе</td> <td>Запуск</td> </tr>"
+            result += "<table border = 0>"
+            result += "<tr> <td>Номер теста</td> <td>Входные данные</td> <td>Верное значение на выходе</td> <td>Текущее значение на выходе</td> <td>Запуск</td> </tr>"
 
             test_num = 0
             for test in task_tests:
@@ -247,6 +261,7 @@ def GenTestsHTML():
                 test_input = test[0]
                 test_good_output = test[1]
                 result += "</tr>"
+                result += "<td> <b>" + str(test_num + 1) + ".</b></td>"
                 result += "<td>" + test_input + "</td>"
                 in_id = InputTestId(tn, test_num)
                 result += "<td id='" + in_id + "'>" + test_good_output + "</td>"
@@ -282,14 +297,9 @@ def GenTestsHTML():
 
 document["tests"].innerHTML = GenTestsHTML()
 
-def Start(e):
-    global binds;
-    for b in binds:
-        document[b[0]].bind("click", b[1])
+for b in binds:
+    document[b[0]].bind("click", b[1])
 
-#document["start_button"].bind("click", Start)
-
-Start(1)
 
 </script>
 
