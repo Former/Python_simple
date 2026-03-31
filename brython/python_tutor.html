@@ -181,8 +181,7 @@ def RunTestButton(event, tn, test_num, test):
     c = 'red'
     if (n.strip() == good.strip()):
         c = 'green'
-    #document[OutTestId(tn, test_num)].innerHTML = "<p bgcolor=" + c + ">" + n + "</p>"
-    document[OutTestId(tn, test_num)].innerHTML = "<p style='background-color:" + c + ";'>" + n + "</p>"
+    document[OutTestId(tn, test_num)].innerHTML = "<p style='background-color:" + c + ";'> &nbsp;" + n + "</p>"
 
 global binds;
 binds = []
@@ -203,15 +202,16 @@ def GenTestsHTML():
             task_name = task[0]
             task_desc = task[1]
             task_tests = task[2]
-            result += "<details "+ topen +"><summary>" + task_name + "</summary>"
+            result += "<details "+ topen +"><summary> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Задача: " + task_name + "</summary>"
             topen = ""
             tn = str(task_num)
+            result += "<table> <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td> <td>"
             result += "<div>"
             result += "<h4>Условие:</h4>"
             result += "<p>" + task_desc + "</p>"
             result += "</div>"
             result += "<div>"
-            result += "<p style='color:gray;'>Для получения входных данных использвйте <b>input()</b>, для вывода данных используйте <b>print()</b>.</p>"
+            result += "<p style='color:gray;'>Для получения входных данных используйте <b>input()</b>, для вывода данных используйте <b>print()</b>.</p>"
             result += "</div>"
             result += "<div>"
             result += "<p style='color:red;' id='" + OutErrorId(tn) +"'></p>"
@@ -289,6 +289,7 @@ def GenTestsHTML():
             result += "<div>"
             result += "<button id='" + AllRunButtonId(tn) + "'>Запустить на всех тестах</button>"
             result += "</div>"
+            result += "</td> </tr> </table> "
 
             result += "</details>"
             task_num += 1
