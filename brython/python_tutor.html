@@ -1,0 +1,300 @@
+<!-- Copyright 2026 by Alexei Bezborodov <AlexeiBv@narod.ru> -->
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Простая заготовка</title>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12/brython.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12/brython_stdlib.js"></script>
+</head>
+<body>
+
+<p id="tests"></p>
+
+<!--
+<button id="start_button">Старт</button>
+-->
+
+<script type="text/python">
+
+from browser import document, html, window
+
+tests_if = [
+    [
+        "Знак числа",
+        "Если число больше нуля, то выведите один, если меньше, то выведите минус один, если равно, то верните нуль.",
+        [
+            ["10", "1"],
+            ["-45", "-1"],
+            ["0", "0"],
+            ["1", "1"],
+            ["-1", "-1"],
+            ["100000000000", "1"],
+        ]
+    ],
+    [
+        "Максимум из двух чисел",
+        "Дано два целых числа. Найти максимальное число.",
+        [
+            ["10\n1", "10"],
+            ["-45\n1", "1"],
+            ["0\n0", "0"],
+            ["1\n1", "1"],
+            ["-1\n1", "1"],
+            ["100000000000\n1", "100000000000"],
+        ]
+    ],
+    [
+        "Максимум из трёх чисел",
+        "Дано три целых числа. Найти максимальное число.",
+        [
+            ["10\n0\n1", "10"],
+            ["-45\n-1\n1", "1"],
+            ["0\n0\n0", "0"],
+            ["1\n1\n1", "1"],
+            ["-1\n-1\n-1", "-1"],
+            ["100000000000\n1456\n1", "100000000000"],
+        ]
+    ],
+]
+
+tests_func = [
+    [
+        "Функция сложения",
+        "На вход функции передаётся два числа, на выходе должна быть сумма чисел.",
+        [
+            ["10 2", "12"],
+            ["-45 35", "-10"],
+            ["0 0", "0"],
+            ["1 1", "2"],
+            ["-1 1", "0"],
+            ["-1 -1", "-2"],
+            ["-100000000000 100000000001", "1"],
+        ]
+    ],
+    [
+        "Функция переворота слова",
+        "На вход функции передаётся одно слово, на выходе должно быть слово написанное задом наперёд.",
+        [
+            ["я", "я"],
+            ["мы", "ым"],
+            ["нет", "тен"],
+            ["один", "нидо"],
+            ["два", "авд"],
+        ]
+    ],
+    [
+        "Функция переворота предолжения",
+        "На вход функции передаётся одно предожение без знаков припенания, на выходе каждое слово должно быть написанно задом наперёд.",
+        [
+            ["я мы", "я ым"],
+            ["привет", "тевирп"],
+            ["привет мир", "тевирп рим"],
+            ["один два", "нидо авд"],
+            ["что-то", "от-отч"],
+        ]
+    ],
+]
+
+
+global all_tests;
+all_tests = [
+    [
+        "Условия",
+        tests_if,
+    ],
+    [
+        "Функции",
+        tests_func,
+    ],
+]
+
+def InputDataId(tn):
+    return "input_data" + tn
+
+def InputCodeId(tn):
+    return "input_code" + tn
+
+def OutputDataId(tn):
+    return "output_data" + tn
+
+def OutErrorId(tn):
+    return "out_error" + tn
+
+def RunButtonId(tn):
+    return "run_button" + tn
+
+def AllRunButtonId(tn):
+    return "all_run_button" + tn
+
+def OutTestId(tn, test_num):
+    return "out_test_" + tn + "_" + str(test_num)  
+
+def InputTestId(tn, test_num):
+    return "input_test_" + tn + "_" + str(test_num)  
+
+def RunTestId(tn, test_num):
+    return "run_test_" + tn + "_" + str(test_num)  
+
+def RunButton(event, tn):
+    od = OutputDataId(tn)
+    input_data = document[InputDataId(tn)].value
+    input_code = document[InputCodeId(tn)].value
+    code_pref = "global input_data\n"
+    code_pref += "input_data = '''" + input_data + "'''\n"
+    code_pref += '''
+global input_count
+input_count = 0
+def input():
+    global input_count
+    global input_data
+    lines = input_data.split('\\n')
+    out = lines[input_count]
+    input_count += 1
+    return out
+
+def print(a):
+    od = "''' + od + '''"
+    document[od].value += str(a) + "\\n"
+
+'''
+    _locals = locals()
+    try:
+        document[od].value = ""
+        document[OutErrorId(tn)].innerHTML = ""
+        cmd = code_pref + input_code
+        #print(cmd)
+        exec(cmd, globals(), _locals)
+    except Exception as e: #SyntaxError as e:
+        document[OutErrorId(tn)].innerHTML = "Ошибка в исполнении кода: " + str(e)
+        return
+
+def AllRunButton(event, tn, task_tests):
+    for test_num in range(len(task_tests)):
+        RunTestButton(event, tn, test_num, task_tests[test_num])
+    return
+
+def RunTestButton(event, tn, test_num, test):
+    input_data = test[0]
+    good_input_data = test[1]
+    document[InputDataId(tn)].value = input_data
+    RunButton(event, tn)
+    n = document[OutputDataId(tn)].value
+    good = document[InputTestId(tn, test_num)].innerHTML 
+    c = 'red'
+    if (n.strip() == good.strip()):
+        c = 'green'
+    document[OutTestId(tn, test_num)].innerHTML = "<p style='color:" + c + ";'>" + n + "</p>"
+
+global binds;
+binds = []
+
+def GenTestsHTML():
+    result = ""
+    global all_tests;
+    global binds;
+    ropen = "open"
+    task_num = 0
+    for razdel in all_tests:
+        rname = razdel[0]
+        r = razdel[1]
+        result += "<details "+ ropen +"><summary>" + rname + "</summary>"
+        ropen = ""
+        topen = "open"
+        for task in r:
+            task_name = task[0]
+            task_desc = task[1]
+            task_tests = task[2]
+            result += "<details "+ topen +"><summary>" + task_name + "</summary>"
+            topen = ""
+            tn = str(task_num)
+            result += "<div>"
+            result += "<h4>Условие:</h4>"
+            result += "<p>" + task_desc + "</p>"
+            result += "</div>"
+            result += "<div>"
+            result += "<p style='color:gray;'>Для получения входных данных использвйте <b>input()</b>, для вывода данных используйте <b>print()</b>.</p>"
+            result += "</div>"
+            result += "<div>"
+            result += "<p style='color:red;' id='" + OutErrorId(tn) +"'></p>"
+            result += "</div>"
+            result += "<div>"
+            result += "<button id='" + RunButtonId(tn) + "'>Запустить</button>"
+            result += "</div>"
+            result += "<div>"
+            result += "<textarea id='" + InputCodeId(tn) + "' cols='40' rows='15'></textarea>"
+            result += "</div>"
+            result += "<div>"
+            result += "<textarea id='" + InputDataId(tn) + "' cols='20' rows='5'>" + task_tests[0][0] + "</textarea>"
+            result += "<textarea id='" + OutputDataId(tn) + "' cols='20' rows='5'></textarea>"
+            result += "</div>"
+
+            def MakeRunButton(tn):
+                def _RunButton(event):
+                    return RunButton(event, tn)
+                return _RunButton
+
+            binds += [[RunButtonId(tn), MakeRunButton(tn)]]
+
+            result += "<div>"
+            result += "<table border = 1>"
+            result += "<tr> <td>Входные данные</td> <td>Верное значение на выходе</td> <td>Текущее значение на выходе</td> <td>Запуск</td> </tr>"
+
+            test_num = 0
+            for test in task_tests:
+                result += "<tr>"
+                test_input = test[0]
+                test_good_output = test[1]
+                result += "</tr>"
+                result += "<td>" + test_input + "</td>"
+                in_id = InputTestId(tn, test_num)
+                result += "<td id='" + in_id + "'>" + test_good_output + "</td>"
+                out_id = OutTestId(tn, test_num) 
+                result += "<td id='" + out_id + "'></td>"
+                run_id = RunTestId(tn, test_num)
+                result += "<td>" + "<button id='" + run_id + "'>Запустить тест</button>" + "</td>"
+                def MakeRunTestButton(tn, test_num, out_id, test):
+                    def _RunTestButton(event):
+                        return RunTestButton(event, tn, test_num, test)
+                    return _RunTestButton
+                #print(out_id, run_id, tn, test_num, test)
+                binds += [[run_id, MakeRunTestButton(tn, test_num, out_id, test)]]
+
+                test_num += 1
+            result += "</table>"
+            result += "</div>"
+
+            def MakeAllRunButton(tn, task_tests):
+                def _AllRunButton(event):
+                    return AllRunButton(event, tn, task_tests)
+                return _AllRunButton
+            binds += [[AllRunButtonId(tn), MakeAllRunButton(tn, task_tests)]]
+
+            result += "<div>"
+            result += "<button id='" + AllRunButtonId(tn) + "'>Запустить на всех тестах</button>"
+            result += "</div>"
+
+            result += "</details>"
+            task_num += 1
+        result += "</details>"
+    return result
+
+document["tests"].innerHTML = GenTestsHTML()
+
+def Start(e):
+    global binds;
+    for b in binds:
+        document[b[0]].bind("click", b[1])
+
+#document["start_button"].bind("click", Start)
+
+Start(1)
+
+</script>
+
+</body>
+
+</html>
+
+
