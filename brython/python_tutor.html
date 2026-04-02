@@ -7,10 +7,41 @@
 <title>Простая заготовка</title>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12/brython.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12/brython_stdlib.js"></script>
+<script src="lua.vm.js@0.0.1"></script>
 </head>
 <body>
 
+<label for="lang">Выберите язык программирования:</label>
+<select name="languages" id="lang">
+    <option value="python">python</option>
+    <option value="lua">lua</option>
+</select>
+
 <p id="tests"></p>
+
+<script> 
+    function ExecuteLua(code) { 
+        try { 
+            L.execute(code);
+        } catch(e) { 
+            return e.toString();
+        }
+        return "";
+    }
+
+var jsprint = '';
+setJsPrint = function SetJsprint(value)
+{
+    jsprint = value;
+}
+
+function GetJsprint()
+{
+    return jsprint;
+}
+getJsPrint = GetJsprint;
+
+</script>
 
 <script type="text/python">
 
@@ -134,6 +165,12 @@ def RunTestId(tn, test_num):
     return "run_test_" + tn + "_" + str(test_num)  
 
 def RunButton(event, tn):
+    lang = document["lang"].value
+    if lang == 'python':
+        return RunButtonPython(event, tn)
+    return RunButtonLua(event, tn)
+
+def RunButtonPython(event, tn):
     od = OutputDataId(tn)
     input_data = document[InputDataId(tn)].value
     input_code = document[InputCodeId(tn)].value
@@ -157,14 +194,55 @@ def print(a):
 '''
     _locals = locals()
     try:
-        document[od].value = ""
         document[OutErrorId(tn)].innerHTML = ""
+
+        document[od].value = ""
         cmd = code_pref + input_code
         #print(cmd)
         exec(cmd, globals(), _locals)
     except Exception as e: #SyntaxError as e:
         document[OutErrorId(tn)].innerHTML = "Ошибка в исполнении кода: " + str(e)
         return
+
+def RunButtonLua(event, tn):
+    input_data = document[InputDataId(tn)].value
+    input_code = document[InputCodeId(tn)].value
+    code_pref = ""
+    code_pref += "input_data = [[" + input_data + "]]\n"
+    code_pref += '''
+input_count = 1
+function input()
+    local lines = {};
+    for line in string.gmatch(input_data .. "\\n", "(.-)\\n") do
+        table.insert(lines, line);
+    end
+    out = lines[input_count]
+    input_count = input_count + 1
+    return out
+end
+
+js.global:setJsPrint("")
+function print(a)
+    js.global:setJsPrint(js.global:getJsPrint() .. a .. "\\n")
+end
+
+'''
+    error = ''
+    try:
+        document[OutErrorId(tn)].innerHTML = ""
+
+        cmd = code_pref + input_code
+        print(cmd)
+        error = window.ExecuteLua(cmd);
+
+    except Exception as e: #SyntaxError as e:
+        document[OutErrorId(tn)].innerHTML = "Ошибка в исполнении кода: " + str(e)
+        return
+    if error != '':
+        document[OutErrorId(tn)].innerHTML += "." + str(error)
+        return
+    document[OutputDataId(tn)].value = window.GetJsprint();
+
 
 def AllRunButton(event, tn, task_tests):
     for test_num in range(len(task_tests)):
@@ -202,10 +280,11 @@ def GenTestsHTML():
             task_name = task[0]
             task_desc = task[1]
             task_tests = task[2]
-            result += "<details "+ topen +"><summary> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Задача: " + task_name + "</summary>"
+            nbsp = "&nbsp;" * 6
+            result += "<details "+ topen +"><summary> " + nbsp + " Задача: " + task_name + "</summary>"
             topen = ""
             tn = str(task_num)
-            result += "<table> <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td> <td>"
+            result += "<table> <tr><td>" + nbsp * 3 + "</td> <td>"
             result += "<div>"
             result += "<h4>Условие:</h4>"
             result += "<p>" + task_desc + "</p>"
