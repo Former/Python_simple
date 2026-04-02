@@ -19,30 +19,6 @@
 
 <p id="tests"></p>
 
-<script> 
-    function ExecuteLua(code) { 
-        try { 
-            L.execute(code);
-        } catch(e) { 
-            return e.toString();
-        }
-        return "";
-    }
-
-var jsprint = '';
-setJsPrint = function SetJsprint(value)
-{
-    jsprint = value;
-}
-
-function GetJsprint()
-{
-    return jsprint;
-}
-getJsPrint = GetJsprint;
-
-</script>
-
 <script type="text/python">
 
 from browser import document, html, window
@@ -112,14 +88,14 @@ tests_func = [
         ]
     ],
     [
-        "Функция переворота предолжения",
+        "Функция переворота предоложения",
         "На вход функции передаётся одно предожение без знаков припенания, на выходе каждое слово должно быть написанно задом наперёд.",
         [
             ["я мы", "я ым"],
             ["привет", "тевирп"],
             ["привет мир", "тевирп рим"],
             ["один два", "нидо авд"],
-            ["что-то", "от-отч"],
+            ["что-то такое", "от-отч еокат"],
         ]
     ],
 ]
@@ -304,24 +280,21 @@ def GenTestsHTML():
             result += "<div>"
             result += "<textarea id='" + InputCodeId(tn) + "' cols='80' rows='20'></textarea>"
             result += "</div>"
-            result += "<div style='display: flex;'>"
-            result += "<div style='display: float;'>"
+            result += "<table> <tr><td>"
             result += "<div>"
             result += "Входные данные:"
             result += "</div>"
             result += "<div>"
             result += "<textarea id='" + InputDataId(tn) + "' cols='40' rows='5'>" + task_tests[0][0] + "</textarea>"
             result += "</div>"
-            result += "</div>"
+            result += "</td> <td>"
             result += "<div>"
-            result += "<div style='display: float;'>"
             result += "Выходные данные:"
-            result += "</div>"
             result += "<div>"
             result += "<textarea id='" + OutputDataId(tn) + "' cols='40' rows='5'></textarea>"
             result += "</div>"
             result += "</div>"
-            result += "</div>"
+            result += "</td> </tr> </table>"
 
             def MakeRunButton(tn):
                 def _RunButton(event):
@@ -382,6 +355,31 @@ for b in binds:
 
 
 </script>
+
+<script> 
+    function ExecuteLua(code) { 
+        try { 
+            L.execute(code);
+        } catch(e) { 
+            return e.toString();
+        }
+        return "";
+    }
+
+var jsprint = '';
+setJsPrint = function SetJsprint(value)
+{
+    jsprint = value;
+}
+
+function GetJsprint()
+{
+    return jsprint;
+}
+getJsPrint = GetJsprint;
+
+</script>
+
 
 </body>
 
