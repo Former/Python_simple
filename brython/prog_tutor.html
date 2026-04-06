@@ -149,8 +149,21 @@ def RunButton(event, tn):
         return RunButtonLua(event, tn)
     return RunButtonJS(event, tn)
 
+global g_str_print;
+g_str_print = '';
+
+def SetPrint(a):
+    global g_str_print;
+    g_str_print = a
+
+def GetPrint():
+    global g_str_print;
+    return g_str_print
+
+window.SetPrint = SetPrint
+window.GetPrint = GetPrint
+
 def RunButtonPython(event, tn):
-    od = OutputDataId(tn)
     input_data = document[InputDataId(tn)].value
     input_code = document[InputCodeId(tn)].value
     code_pref = "global input_data\n"
@@ -166,23 +179,23 @@ def input():
     input_count += 1
     return out
 
+SetPrint("")
 def print(a):
-    od = "''' + od + '''"
-    document[od].value += str(a) + "\\n"
+    SetPrint(GetPrint() + a + "\\n")
 
 '''
-    _locals = locals()
     try:
         document[OutErrorId(tn)].innerHTML = ""
 
-        document[od].value = ""
+        document[OutputDataId(tn)].value = ""
         cmd = code_pref + input_code
-        #print(cmd)
-        exec(cmd, globals(), _locals)
-    except Exception as e: #SyntaxError as e:
+        print(cmd)
+        exec(cmd)
+    except Exception as e:
         document[OutErrorId(tn)].innerHTML = "Ошибка в исполнении кода: " + str(e)
         document[OutputDataId(tn)].value = ""
         return
+    document[OutputDataId(tn)].value = GetPrint();
 
 def RunButtonLua(event, tn):
     input_data = document[InputDataId(tn)].value
@@ -201,9 +214,9 @@ function input()
     return out
 end
 
-js.global:Set_JS_Print("")
+js.global:SetPrint("")
 function print(a)
-    js.global:Set_JS_Print(js.global:Get_JS_Print() .. a .. "\\n")
+    js.global:SetPrint(js.global:GetPrint() .. a .. "\\n")
 end
 
 '''
@@ -215,14 +228,14 @@ end
         print(cmd)
         error = window.ExecuteLua(cmd);
 
-    except Exception as e: #SyntaxError as e:
+    except Exception as e:
         document[OutErrorId(tn)].innerHTML = "Ошибка в исполнении кода: " + str(e)
         return
     if error != '':
         document[OutErrorId(tn)].innerHTML += "." + str(error)
         document[OutputDataId(tn)].value = ""
         return
-    document[OutputDataId(tn)].value = window.Get_JS_Print();
+    document[OutputDataId(tn)].value = GetPrint();
 
 def RunButtonJS(event, tn):
     input_data = document[InputDataId(tn)].value
@@ -232,19 +245,15 @@ def RunButtonJS(event, tn):
     code_pref += '''
 var input_count = 0;
 function input() {
-    console.log("input_data=" + input_data);
     let lines = input_data.split(/\\r\\n|\\r|\\n/);
-    console.log("lines=" + lines);
     let out = lines[input_count];
     input_count = input_count + 1;
-    console.log("out=" + out);
     return out;
 }
 
-Set_JS_Print("");
+SetPrint("");
 function print(a) {
-    console.log("a=" + a);
-    Set_JS_Print(Get_JS_Print() + a + "\\n");
+    SetPrint(GetPrint() + a + "\\n");
 }
 
 '''
@@ -256,14 +265,14 @@ function print(a) {
         print(cmd)
         error = window.ExecuteJS(cmd);
 
-    except Exception as e: #SyntaxError as e:
+    except Exception as e:
         document[OutErrorId(tn)].innerHTML = "Ошибка в исполнении кода: " + str(e)
         document[OutputDataId(tn)].value = ""
         return
     if error != '':
         document[OutErrorId(tn)].innerHTML += "." + str(error)
         return
-    document[OutputDataId(tn)].value = window.Get_JS_Print();
+    document[OutputDataId(tn)].value = GetPrint();
 
 
 def AllRunButton(event, tn, task_tests):
