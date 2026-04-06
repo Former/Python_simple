@@ -15,6 +15,7 @@
 <select name="languages" id="lang">
     <option value="python">python</option>
     <option value="lua">lua</option>
+    <option value="javascript">javascript</option>
 </select>
 
 <p id="tests"></p>
@@ -144,7 +145,9 @@ def RunButton(event, tn):
     lang = document["lang"].value
     if lang == 'python':
         return RunButtonPython(event, tn)
-    return RunButtonLua(event, tn)
+    elif lang == 'lua':
+        return RunButtonLua(event, tn)
+    return RunButtonJS(event, tn)
 
 def RunButtonPython(event, tn):
     od = OutputDataId(tn)
@@ -178,6 +181,7 @@ def print(a):
         exec(cmd, globals(), _locals)
     except Exception as e: #SyntaxError as e:
         document[OutErrorId(tn)].innerHTML = "Ошибка в исполнении кода: " + str(e)
+        document[OutputDataId(tn)].value = ""
         return
 
 def RunButtonLua(event, tn):
@@ -197,9 +201,9 @@ function input()
     return out
 end
 
-js.global:setJsPrint("")
+js.global:Set_JS_Print("")
 function print(a)
-    js.global:setJsPrint(js.global:getJsPrint() .. a .. "\\n")
+    js.global:Set_JS_Print(js.global:Get_JS_Print() .. a .. "\\n")
 end
 
 '''
@@ -216,8 +220,50 @@ end
         return
     if error != '':
         document[OutErrorId(tn)].innerHTML += "." + str(error)
+        document[OutputDataId(tn)].value = ""
         return
-    document[OutputDataId(tn)].value = window.GetJsprint();
+    document[OutputDataId(tn)].value = window.Get_JS_Print();
+
+def RunButtonJS(event, tn):
+    input_data = document[InputDataId(tn)].value
+    input_code = document[InputCodeId(tn)].value
+    code_pref = ""
+    code_pref += "var input_data = `" + input_data + "`;\n"
+    code_pref += '''
+var input_count = 0;
+function input() {
+    console.log("input_data=" + input_data);
+    let lines = input_data.split(/\\r\\n|\\r|\\n/);
+    console.log("lines=" + lines);
+    let out = lines[input_count];
+    input_count = input_count + 1;
+    console.log("out=" + out);
+    return out;
+}
+
+Set_JS_Print("");
+function print(a) {
+    console.log("a=" + a);
+    Set_JS_Print(Get_JS_Print() + a + "\\n");
+}
+
+'''
+    error = ''
+    try:
+        document[OutErrorId(tn)].innerHTML = ""
+
+        cmd = code_pref + input_code
+        print(cmd)
+        error = window.ExecuteJS(cmd);
+
+    except Exception as e: #SyntaxError as e:
+        document[OutErrorId(tn)].innerHTML = "Ошибка в исполнении кода: " + str(e)
+        document[OutputDataId(tn)].value = ""
+        return
+    if error != '':
+        document[OutErrorId(tn)].innerHTML += "." + str(error)
+        return
+    document[OutputDataId(tn)].value = window.Get_JS_Print();
 
 
 def AllRunButton(event, tn, task_tests):
@@ -366,20 +412,25 @@ for b in binds:
         return "";
     }
 
-var jsprint = '';
-setJsPrint = function SetJsprint(value)
-{
-    jsprint = value;
-}
+    function ExecuteJS(code) { 
+        try { 
+            eval(code);
+        } catch(e) { 
+            return e.toString();
+        }
+        return "";
+    }
 
-function GetJsprint()
-{
-    return jsprint;
-}
-getJsPrint = GetJsprint;
+    var jsprint = '';
+    function Set_JS_Print(value) {
+        jsprint = value;
+    }
+
+    function Get_JS_Print() {
+        return jsprint;
+    }
 
 </script>
-
 
 </body>
 
