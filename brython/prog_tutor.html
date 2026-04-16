@@ -34,6 +34,22 @@
 
 from browser import document, html, window
 
+def CheckTaskCode(check_array, code):
+    lang_name = document["lang"].value
+    nif = 0
+    nfor = 1
+    nfunc = 2
+    lang = ['if', 'for', 'def']
+    if lang_name == 'lua' or lang_name == 'javascript':
+        lang = ['if', 'for', 'function']
+    for ch in check_array:
+        cond = ch[0]
+        error = ch[1]
+        cmd = '''"""''' + code + '''"""''' + cond
+        if eval(cmd):
+            return error
+    return ""
+
 
 tests_base = [
     [
@@ -200,7 +216,11 @@ tests_func = [
             ["-1 1", "0"],
             ["-1 -1", "-2"],
             ["-100000000000 100000000001", "1"],
-        ]
+        ],
+        [
+            ['.count(lang[nfunc]) == 0', 'Нужно использовать функцию'],
+            ['.count(lang[nfunc]) > 1', 'Нужно создать только одну функцию'],
+        ],
     ],
     [
         "Функция переворота слова",
@@ -314,6 +334,7 @@ def RunLang(code_pref, execute, input_data, input_code):
     exec(execute)
 
 def RunLangHTML(tn, code_pref, execute):
+    global g_tasks
     input_data = document[InputDataId(tn)].value
     input_code = document[InputCodeId(tn)].value
     document[OutputDataId(tn)].value = ""
@@ -325,11 +346,18 @@ def RunLangHTML(tn, code_pref, execute):
         document[OutputDataId(tn)].value = ""
         return
     document[OutputDataId(tn)].value = GetPrint();
+    task = g_tasks[int(tn)]
+    print(tn, task)
+    if len(task) > 3:
+        check_array = task[3]
+        error = CheckTaskCode(check_array, input_code)
+        if error != '':
+            document[OutErrorId(tn)].innerHTML += "Ошибка в проверке кода: " + str(error)
 
 def RunButtonPython(event, tn):
     code_pref = '''
 global input_data
-input_data = "@input_data"
+input_data = \'\'\'@input_data\'\'\'
 
 global input_count
 input_count = 0
@@ -412,7 +440,11 @@ def RunTestButton(event, tn, test_num, test):
 global binds;
 binds = []
 
+global g_tasks
+
 def GenTestsHTML():
+    global g_tasks
+    g_tasks = []
     result = ""
     global all_tests;
     global binds;
@@ -428,6 +460,7 @@ def GenTestsHTML():
         topen = "open"
         t_num = 0
         for task in r:
+            g_tasks += [task]
             t_num += 1
             task_name = task[0]
             task_desc = task[1]
