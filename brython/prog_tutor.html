@@ -117,7 +117,7 @@ tests_if = [
 tests_string = [
     [
         "Первая буква",
-        "На выходе слово. Вывести из неё первую букву.",
+        "На входе слово. Вывести из неё первую букву. Если буквы нет, то ничего не выводить.",
         [
             ["арбуз", "а"],
             ["-45", "-"],
@@ -125,6 +125,64 @@ tests_string = [
             ["день", "д"],
             ["мир", "м"],
             ["строка", "с"],
+        ]
+    ],
+    [
+        "Вторая буква",
+        "На входе слово. Вывести из неё вторую букву. Если буквы нет, то ничего не выводить.",
+        [
+            ["арбуз", "р"],
+            ["-45", "4"],
+            ["яблоко", "б"],
+            ["а", ""],
+            ["мир", "и"],
+            ["строка", "т"],
+        ]
+    ],
+    [
+        "Первое слово",
+        "На входе предложение. Вывести первое слово. Если слова нет, то ничего не выводить.",
+        [
+            ["Я гулял по улице", "Я"],
+            ["Смеркалось", "Смеркалось"],
+            ["", ""],
+            ["Привет мир", "Привет"],
+            ["мир", "мир"],
+            ["Красная строка", "Красная"],
+        ]
+    ],
+    [
+        "Второе слово",
+        "На входе предложение. Вывести второе слово. Если слова нет, то ничего не выводить.",
+        [
+            ["Я гулял по улице", "гулял"],
+            ["Смеркалось", ""],
+            ["", ""],
+            ["Привет мир", "мир"],
+            ["мир", ""],
+            ["Красная строка", "строка"],
+        ]
+    ],
+    [
+        "Слово наоборот",
+        "На входе одно слово. Поменять порядок буквы в слове на противоположный.",
+        [
+            ["я", "я"],
+            ["привет", "тевирп"],
+            ["мир", "рим"],
+            ["один", "нидо"],
+            ["два", "авд"],
+        ]
+    ],
+    [
+        "Все слова наоборот",
+        "На входе предложение. Поменять порядок буквы в каждом слове на противоположный.",
+        [
+            ["я мы", "я ым"],
+            ["привет", "тевирп"],
+            ["привет мир", "тевирп рим"],
+            ["один два", "нидо авд"],
+            ["что-то такое", "от-отч еокат"],
         ]
     ],
 ]
@@ -250,12 +308,29 @@ def GetPrint():
 window.SetPrint = SetPrint
 window.GetPrint = GetPrint
 
-def RunButtonPython(event, tn):
+def RunLang(code_pref, execute, input_data, input_code):
+    code_pref = code_pref.replace("@input_data", input_data)
+    cmd = code_pref + input_code
+    exec(execute)
+
+def RunLangHTML(tn, code_pref, execute):
     input_data = document[InputDataId(tn)].value
     input_code = document[InputCodeId(tn)].value
-    code_pref = "global input_data\n"
-    code_pref += "input_data = '''" + input_data + "'''\n"
-    code_pref += '''
+    document[OutputDataId(tn)].value = ""
+    document[OutErrorId(tn)].innerHTML = ""
+    try:
+        RunLang(code_pref, execute, input_data, input_code)
+    except Exception as e:
+        document[OutErrorId(tn)].innerHTML = "Ошибка в исполнении кода: " + str(e)
+        document[OutputDataId(tn)].value = ""
+        return
+    document[OutputDataId(tn)].value = GetPrint();
+
+def RunButtonPython(event, tn):
+    code_pref = '''
+global input_data
+input_data = "@input_data"
+
 global input_count
 input_count = 0
 def input():
@@ -271,25 +346,12 @@ def print(a):
     SetPrint(GetPrint() + str(a) + "\\n")
 
 '''
-    try:
-        document[OutErrorId(tn)].innerHTML = ""
-
-        document[OutputDataId(tn)].value = ""
-        cmd = code_pref + input_code
-        print(cmd)
-        exec(cmd)
-    except Exception as e:
-        document[OutErrorId(tn)].innerHTML = "Ошибка в исполнении кода: " + str(e)
-        document[OutputDataId(tn)].value = ""
-        return
-    document[OutputDataId(tn)].value = GetPrint();
+    RunLangHTML(tn, code_pref, "exec(cmd)");
 
 def RunButtonLua(event, tn):
-    input_data = document[InputDataId(tn)].value
-    input_code = document[InputCodeId(tn)].value
-    code_pref = ""
-    code_pref += "input_data = [[" + input_data + "]]\n"
-    code_pref += '''
+    code_pref = '''
+input_data = [[@input_data]]
+
 input_count = 1
 function input()
     local lines = {};
@@ -307,29 +369,12 @@ function print(a)
 end
 
 '''
-    error = ''
-    try:
-        document[OutErrorId(tn)].innerHTML = ""
-
-        cmd = code_pref + input_code
-        print(cmd)
-        error = window.ExecuteLua(cmd);
-
-    except Exception as e:
-        document[OutErrorId(tn)].innerHTML = "Ошибка в исполнении кода: " + str(e)
-        return
-    if error != '':
-        document[OutErrorId(tn)].innerHTML += "." + str(error)
-        document[OutputDataId(tn)].value = ""
-        return
-    document[OutputDataId(tn)].value = GetPrint();
+    RunLangHTML(tn, code_pref, "window.ExecuteLua(cmd)");
 
 def RunButtonJS(event, tn):
-    input_data = document[InputDataId(tn)].value
-    input_code = document[InputCodeId(tn)].value
-    code_pref = ""
-    code_pref += "var input_data = `" + input_data + "`;\n"
-    code_pref += '''
+    code_pref = '''
+var input_data = `@input_data`
+
 var input_count = 0;
 function input() {
     let lines = input_data.split(/\\r\\n|\\r|\\n/);
@@ -344,23 +389,8 @@ function print(a) {
 }
 
 '''
-    error = ''
-    try:
-        document[OutErrorId(tn)].innerHTML = ""
 
-        cmd = code_pref + input_code
-        print(cmd)
-        error = window.ExecuteJS(cmd);
-
-    except Exception as e:
-        document[OutErrorId(tn)].innerHTML = "Ошибка в исполнении кода: " + str(e)
-        document[OutputDataId(tn)].value = ""
-        return
-    if error != '':
-        document[OutErrorId(tn)].innerHTML += "." + str(error)
-        return
-    document[OutputDataId(tn)].value = GetPrint();
-
+    RunLangHTML(tn, code_pref, "window.ExecuteJS(cmd)");
 
 def AllRunButton(event, tn, task_tests):
     for test_num in range(len(task_tests)):
@@ -505,30 +535,11 @@ for b in binds:
 
 <script> 
     function ExecuteLua(code) { 
-        try { 
-            L.execute(code);
-        } catch(e) { 
-            return e.toString();
-        }
-        return "";
+        L.execute(code);
     }
 
     function ExecuteJS(code) { 
-        try { 
-            eval(code);
-        } catch(e) { 
-            return e.toString();
-        }
-        return "";
-    }
-
-    var jsprint = '';
-    function Set_JS_Print(value) {
-        jsprint = value;
-    }
-
-    function Get_JS_Print() {
-        return jsprint;
+        eval(code);
     }
 
 </script>
