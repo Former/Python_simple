@@ -9,13 +9,15 @@
 <!-- internet -- >
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12/brython.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12/brython_stdlib.js"></script>
-<script src="lua.vm.js@0.0.1"></script>
+<script type="text/javascript" src="https://github.com/daurnimator/lua.vm.js"></script>
+<script type="text/javascript" src="https://ace.c9.io/build/src/ace.js"></script>
 <!--        -->
 
 <!-- local -->
 <script type="text/javascript" src="brython.min_3.12.js"></script>
 <script type="text/javascript" src="brython_stdlib_3.12.js"></script>
-<script src="lua.vm.js@0.0.1"></script>
+<script type="text/javascript" src="lua.vm.js@0.0.1"></script>
+<script type="text/javascript" src="ace.js"></script>
 <!--       -->
 
 </head>
@@ -336,7 +338,7 @@ def RunLang(code_pref, execute, input_data, input_code):
 def RunLangHTML(tn, code_pref, execute):
     global g_tasks
     input_data = document[InputDataId(tn)].value
-    input_code = document[InputCodeId(tn)].value
+    input_code = window.GetEditorValue(tn); #document[InputCodeId(tn)].value
     document[OutputDataId(tn)].value = ""
     document[OutErrorId(tn)].innerHTML = ""
     try:
@@ -440,9 +442,13 @@ def RunTestButton(event, tn, test_num, test):
 global binds;
 binds = []
 
+global g_aces;
+g_aces = [];
+
 global g_tasks
 
 def GenTestsHTML():
+    global g_aces;
     global g_tasks
     g_tasks = []
     result = ""
@@ -488,7 +494,8 @@ def GenTestsHTML():
             result += "Код программы:"
             result += "</div>"
             result += "<div>"
-            result += "<textarea onkeydown=\"if(event.keyCode===9){var v=this.value,s=this.selectionStart,e=this.selectionEnd;this.value=v.substring(0, s)+'\t'+v.substring(e);this.selectionStart=this.selectionEnd=s+1;return false;}\" id='" + InputCodeId(tn) + "' cols='80' rows='20'></textarea>"
+            result += "<div id=" + InputCodeId(tn) + " style=\"height: 200px; width: 600px\"></div>"
+            g_aces += [[InputCodeId(tn), tn]]
             result += "</div>"
             result += "<table> <tr><td>"
             result += "<div>"
@@ -563,6 +570,11 @@ document["tests"].innerHTML = GenTestsHTML()
 for b in binds:
     document[b[0]].bind("click", b[1])
 
+for a in g_aces:
+    i = a[0]
+    tn = a[1]
+    window.InitACE(i, tn)
+
 
 </script>
 
@@ -574,6 +586,19 @@ for b in binds:
     function ExecuteJS(code) { 
         eval(code);
     }
+
+function InitACE(idname, tn)
+{
+    s="var editor" + tn + " = ace.edit('" + idname + "');";
+    ExecuteJS(s);
+}
+
+function GetEditorValue(tn)
+{
+    s="var code = editor" + tn + ".getValue();";
+    ExecuteJS(s);
+    return code;
+}
 
 </script>
 
