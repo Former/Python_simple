@@ -38,6 +38,15 @@
     <option value="javascript">javascript</option>
 </select>
 
+<button onclick="toggle_ld()">Переключить тему</button> 
+
+<script>
+function toggle_ld() {
+ let element = document.body;
+ element.classList.toggle("dark");
+}
+</script>
+
 <p id="tests"></p>
 
 <script type="text/python">
@@ -505,7 +514,7 @@ def GenTestsHTML():
             result += "Код программы:"
             result += "</div>"
             result += "<div>"
-            result += "<div id=" + InputCodeId(tn) + " style=\"height: 200px; width: 600px\"></div>"
+            result += "<div id=" + InputCodeId(tn) + " style=\"height: 200px; width: 580px\"></div>"
             g_aces += [[InputCodeId(tn), tn]]
             result += "</div>"
             result += "<table> <tr><td>"
@@ -587,7 +596,6 @@ for a in g_aces:
     i = a[0]
     tn = a[1]
     e = window.ace.edit(i)
-    print(e)
     editors.update({tn: e});
     input_code = window.localStorage.getItem(StorageCodeId(tn));
     if input_code:
@@ -607,6 +615,27 @@ for a in g_aces:
         eval(code);
     }
 </script>
+
+<style>
+        body{
+        padding:0% 3% 10% 3%;
+        }
+        h1{
+        color: #32a852;
+        margin-top:30px;
+        }
+    
+        button{
+            cursor: pointer;
+            border: 1px solid #555;
+            padding: 5px;
+            margin-left: 8px; 
+        }
+        .dark{
+            background-color: #222;
+            color: #e6e6e6;
+        }
+</style>
 
 </body>
 
