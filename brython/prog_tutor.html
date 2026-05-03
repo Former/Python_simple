@@ -15,6 +15,7 @@
 <script type="text/javascript" src="https://ace.c9.io/build/src/mode-python.js"></script>
 <script type="text/javascript" src="https://ace.c9.io/build/src/mode-lua.js"></script>
 <script type="text/javascript" src="https://ace.c9.io/build/src/mode-javascript.js"></script>
+<script type="text/javascript" src="https://ace.c9.io/build/src/ext-language_tools.js"></script>
 <!--        -->
 
 <!-- local -->
@@ -26,6 +27,7 @@
 <script type="text/javascript" src="ace/mode-python.js"></script>
 <script type="text/javascript" src="ace/mode-lua.js"></script>
 <script type="text/javascript" src="ace/mode-javascript.js"></script>
+<script type="text/javascript" src="ace/ext-language_tools.js"></script>
 <!--       -->
 
 </head>
@@ -40,18 +42,16 @@
 
 <button onclick="toggle_ld()">Переключить тему</button> 
 
-<script>
-function toggle_ld() {
- let element = document.body;
- element.classList.toggle("dark");
-}
-</script>
-
 <p id="tests"></p>
 
 <script type="text/python">
 
 from browser import document, html, window
+
+def toggle_ld():
+    element = document.body;
+    element.classList.toggle("dark");
+window.toggle_ld = toggle_ld;
 
 def CheckTaskCode(check_array, code):
     lang_name = document["lang"].value
@@ -68,7 +68,6 @@ def CheckTaskCode(check_array, code):
         if eval(cmd):
             return error
     return ""
-
 
 tests_base = [
     [
@@ -108,7 +107,6 @@ tests_base = [
         ]
     ],
 ]
-
 
 tests_if = [
     [
@@ -439,7 +437,6 @@ function print(a) {
 }
 
 '''
-
     RunLangHTML(tn, code_pref, "window.ExecuteJS(cmd)");
 
 def AllRunButton(event, tn, task_tests):
@@ -509,13 +506,11 @@ def GenTestsHTML():
             result += "</div>"
             result += "<div>"
             result += "<button id='" + RunButtonId(tn) + "'>Запустить</button>"
-            result += "</div>"
-            result += "<div>"
-            result += "Код программы:"
+            result += "&nbsp;&nbsp; Код программы:"
             result += "</div>"
             result += "<div>"
             result += "<div id=" + InputCodeId(tn) + " style=\"height: 200px; width: 580px\"></div>"
-            g_aces += [[InputCodeId(tn), tn]]
+            g_aces += [tn]
             result += "</div>"
             result += "<table> <tr><td>"
             result += "<div>"
@@ -592,17 +587,17 @@ for b in binds:
 
 global editors;
 editors = {}
-for a in g_aces:
-    i = a[0]
-    tn = a[1]
-    e = window.ace.edit(i)
+for tn in g_aces:
+    e = window.ace.edit(InputCodeId(tn))
     editors.update({tn: e});
     input_code = window.localStorage.getItem(StorageCodeId(tn));
     if input_code:
         e.setValue(input_code);
     e.setTheme("ace/theme/twilight");
     e.session.setMode("ace/mode/python");
+    e.setOptions({"enableBasicAutocompletion": True, "enableSnippets": True, "enableLiveAutocompletion": True});
 
+window.toggle_ld();
 
 </script>
 
@@ -617,24 +612,24 @@ for a in g_aces:
 </script>
 
 <style>
-        body{
-        padding:0% 3% 10% 3%;
-        }
-        h1{
-        color: #32a852;
-        margin-top:30px;
-        }
-    
-        button{
-            cursor: pointer;
-            border: 1px solid #555;
-            padding: 5px;
-            margin-left: 8px; 
-        }
-        .dark{
-            background-color: #222;
-            color: #e6e6e6;
-        }
+body{
+    padding:0% 3% 10% 3%;
+}
+h1{
+    color: #32a852;
+    margin-top:30px;
+}
+
+button{
+    cursor: pointer;
+    border: 1px solid #555;
+    padding: 5px;
+    margin-left: 8px; 
+}
+.dark{
+    background-color: #222;
+    color: #e6e6e6;
+}
 </style>
 
 </body>
