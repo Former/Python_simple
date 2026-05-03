@@ -11,13 +11,21 @@
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12/brython_stdlib.js"></script>
 <script type="text/javascript" src="https://github.com/daurnimator/lua.vm.js"></script>
 <script type="text/javascript" src="https://ace.c9.io/build/src/ace.js"></script>
+<script type="text/javascript" src="https://ace.c9.io/build/src/theme-twilight.js"></script>
+<script type="text/javascript" src="https://ace.c9.io/build/src/mode-python.js"></script>
+<script type="text/javascript" src="https://ace.c9.io/build/src/mode-lua.js"></script>
+<script type="text/javascript" src="https://ace.c9.io/build/src/mode-javascript.js"></script>
 <!--        -->
 
 <!-- local -->
 <script type="text/javascript" src="brython.min_3.12.js"></script>
 <script type="text/javascript" src="brython_stdlib_3.12.js"></script>
 <script type="text/javascript" src="lua.vm.js@0.0.1"></script>
-<script type="text/javascript" src="ace.js"></script>
+<script type="text/javascript" src="ace/ace.js"></script>
+<script type="text/javascript" src="ace/theme-twilight.js"></script>
+<script type="text/javascript" src="ace/mode-python.js"></script>
+<script type="text/javascript" src="ace/mode-lua.js"></script>
+<script type="text/javascript" src="ace/mode-javascript.js"></script>
 <!--       -->
 
 </head>
@@ -284,6 +292,9 @@ all_tests = [
 def InputDataId(tn):
     return "input_data" + tn
 
+def StorageCodeId(tn):
+    return "storage_code" + tn
+
 def InputCodeId(tn):
     return "input_code" + tn
 
@@ -338,7 +349,8 @@ def RunLang(code_pref, execute, input_data, input_code):
 def RunLangHTML(tn, code_pref, execute):
     global g_tasks
     input_data = document[InputDataId(tn)].value
-    input_code = window.GetEditorValue(tn); #document[InputCodeId(tn)].value
+    input_code = editors.get(tn).getValue(); 
+    window.localStorage.setItem(StorageCodeId(tn), input_code);
     document[OutputDataId(tn)].value = ""
     document[OutErrorId(tn)].innerHTML = ""
     try:
@@ -349,7 +361,6 @@ def RunLangHTML(tn, code_pref, execute):
         return
     document[OutputDataId(tn)].value = GetPrint();
     task = g_tasks[int(tn)]
-    print(tn, task)
     if len(task) > 3:
         check_array = task[3]
         error = CheckTaskCode(check_array, input_code)
@@ -570,10 +581,19 @@ document["tests"].innerHTML = GenTestsHTML()
 for b in binds:
     document[b[0]].bind("click", b[1])
 
+global editors;
+editors = {}
 for a in g_aces:
     i = a[0]
     tn = a[1]
-    window.InitACE(i, tn)
+    e = window.ace.edit(i)
+    print(e)
+    editors.update({tn: e});
+    input_code = window.localStorage.getItem(StorageCodeId(tn));
+    if input_code:
+        e.setValue(input_code);
+    e.setTheme("ace/theme/twilight");
+    e.session.setMode("ace/mode/python");
 
 
 </script>
@@ -586,20 +606,6 @@ for a in g_aces:
     function ExecuteJS(code) { 
         eval(code);
     }
-
-function InitACE(idname, tn)
-{
-    s="var editor" + tn + " = ace.edit('" + idname + "');";
-    ExecuteJS(s);
-}
-
-function GetEditorValue(tn)
-{
-    s="var code = editor" + tn + ".getValue();";
-    ExecuteJS(s);
-    return code;
-}
-
 </script>
 
 </body>
