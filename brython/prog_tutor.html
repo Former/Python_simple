@@ -19,7 +19,7 @@
 <script type="text/javascript" src="https://ace.c9.io/build/src/ext-language_tools.js"></script>
 <!--        -->
 
-<!-- local -->
+<!-- local ace-builds-1.5.0.zip https://github.com/ajaxorg/ace-builds/releases -->
 <script type="text/javascript" src="brython.min_3.12.js"></script>
 <script type="text/javascript" src="brython_stdlib_3.12.js"></script>
 <script type="text/javascript" src="lua.vm.js@0.0.1"></script>
@@ -215,8 +215,115 @@ tests_string = [
             ["что-то такое", "от-отч еокат"],
         ]
     ],
+    [
+        "Замена",
+        "На входе строка. Заменить символ '0' на символ '1'.",
+        [
+            ["0123", "1123"],
+            ["0", "1"],
+            ["123", "123"],
+            ["00 00", "11 11"],
+            ["0123456789йцукенгшщзфывапролдячсмить", "1123456789йцукенгшщзфывапролдячсмить"],
+        ]
+    ],
+    [
+        "Двойная замена",
+        "На входе строка. Заменить символ '0' на символ '1' и наоборот.",
+        [
+            ["0123", "1023"],
+            ["0", "1"],
+            ["", ""],
+            ["1", "0"],
+            ["123", "023"],
+            ["00 11", "11 00"],
+            ["0123456789йцукенгшщзфывапролдячсмить", "1023456789йцукенгшщзфывапролдячсмить"],
+        ]
+    ],
+    [
+        "Смена языка",
+        "На входе строка. Заменить символы из англиской раскалдки на символы из русской раскладки и наоборот.",
+        [
+            ["йцукен", "qwerty"],
+            ["мир", "vbh"],
+            ["vbh", "мир"],
+            ["0123456789", "0123456789"],
+            ["йцукенгшщзхъфывапролджэячсмитьбю.", "qwertyuiop[]asdfghjkl;'zxcvbnm,./"],
+            ["qwertyuiop[]asdfghjkl;'zxcvbnm,./", "йцукенгшщзхъфывапролджэячсмитьбю."],
+            ["qwer йцук", "йцук qwer"],
+        ]
+    ],
 ]
 
+tests_loop = [
+    [
+        "Вывести все строки",
+        "На входе количество строк, и сами строки. Вывести строки.",
+        [
+            ["0", ""],
+            ["1\n2", "2"],
+            ["2\n1\n2", "1\n2"],
+            ["3\na\nb\nc", "a\nb\nc"],
+        ],
+    ],
+    [
+        "Найти минимум",
+        "На входе количество чисел, и целые числа. Вывести минимальное число.",
+        [
+            ["0", ""],
+            ["1\n2", "2"],
+            ["2\n1\n2", "1"],
+            ["3\n-1\n0\n1", "-1"],
+            ["3\n-10\n0\n10", "-10"],
+        ],
+    ],
+    [
+        "Найти максимум",
+        "На входе количество чисел, и целые числа. Вывести максимальное число.",
+        [
+            ["0", ""],
+            ["1\n2", "2"],
+            ["2\n1\n2", "2"],
+            ["3\n-1\n0\n1", "1"],
+            ["3\n-10\n0\n10", "10"],
+        ],
+    ],
+]
+
+tests_list = [
+    [
+        "По словам",
+        "На входе предложение. Вывести все слова на отдельной строчке.",
+        [
+            ["10 2", "10\n2"],
+            ["Привет мир", "Привет\nмир"],
+            ["", ""],
+            ["1", "1"],
+            ["1 2 3 4 5 6 7 8 9 0", "1\n2\n3\n4\n5\n6\n7\n8\n9\n0"],
+        ],
+    ],
+    [
+        "Сумма",
+        "На входе целые числа разделённые пробелом. Вывести сумму всех чисел.",
+        [
+            ["10 2", "12"],
+            ["0 0", "0"],
+            ["", ""],
+            ["1", "1"],
+            ["1 2 3 4 5 6 7 8 9 0", "55"],
+        ],
+    ],
+    [
+        "Максимум",
+        "На входе целые числа разделённые пробелом. Вывести максимальное число.",
+        [
+            ["10 2", "10"],
+            ["0 0", "0"],
+            ["", ""],
+            ["1", "1"],
+            ["1 2 3 4 5 6 7 8 9 0", "9"],
+        ],
+    ],
+]
 
 tests_func = [
     [
@@ -260,6 +367,44 @@ tests_func = [
     ],
 ]
 
+tests_list2d = [
+    [
+        "Квадрат",
+        "На вход приходит целое число. Вывести квадрат из символов '*' длиной и высотой с это число.",
+        [
+            ["", ""],
+            ["0", ""],
+            ["1", "*"],
+            ["2", "**\n**"],
+            ["3", "***\n***\n***"],
+            ["5", "*****\n*****\n*****\n*****\n*****"],
+        ],
+    ],
+    [
+        "Снежинка",
+        "На вход приходит нечётное положительное число. Вывести квадрат из символов ' ' длиной и высотой с это число. Из символов '*' изобразить на квадрате снежинку.",
+        [
+            ["", ""],
+            ["0", ""],
+            ["1", "*"],
+            ["3", "***\n***\n***"],
+            ["5", "* * *\n *** \n*****\n *** \n* * *"],
+            ["7", "*  *  *\n * * * \n  ***  \n*******\n  ***  \n * * * \n*  *  *"],
+        ],
+    ],
+    [
+        "Таблица HTML",
+        "На вход приходит количество строк и строки с числами разделёнными пробелами. Вывести HTML таблицу с тем же количством строк и чтобы каждое число занимало свою ячейку.",
+        [
+            ["", ""],
+            ["0", ""],
+            ["1\n10", "<table><tr><td>10</td></tr></table>"],
+            ["1\n10 20", "<table><tr><td>10</td><td>20</td></tr></table>"],
+            ["2\n10 20\n30 40", "<table><tr><td>10</td><td>20</td></tr><tr><td>30</td><td>40</td></tr></table>"],
+        ],
+    ],
+]
+
 
 global all_tests;
 all_tests = [
@@ -277,11 +422,11 @@ all_tests = [
     ],
     [
         "Циклы",
-        [],
+        tests_loop,
     ],
     [
         "Списки",
-        [],
+        tests_list,
     ],
     [
         "Функции",
@@ -289,7 +434,7 @@ all_tests = [
     ],
     [
         "Двухмерные списки",
-        [],
+        tests_list2d,
     ],
 ]
 
@@ -451,11 +596,11 @@ def RunTestButton(event, tn, test_num, test):
     document[InputDataId(tn)].value = input_data
     RunButton(event, tn)
     n = document[OutputDataId(tn)].value
-    good = document[InputTestId(tn, test_num)].innerHTML 
+    good = document[InputTestId(tn, test_num)].value 
     c = 'red'
     if (n.strip() == good.strip()):
         c = 'green'
-    document[OutTestId(tn, test_num)].innerHTML = "<p style='background-color:" + c + ";'> &nbsp;" + n + "</p>"
+    document[OutTestId(tn, test_num)].innerHTML = "<textarea style='background-color:" + c + ";' readonly>" + n + "</textarea>"
 
 global binds;
 binds = []
@@ -494,7 +639,7 @@ def GenTestsHTML():
             result += "<table> <tr><td>" + nbsp * 3 + "</td> <td>"
             result += "<div>"
             result += "<h4><a href=\"#r" + str(r_num) + "t" + str(t_num) + "\">"+ str(r_num) + "." + str(t_num) +"</a>"
-            result += nbsp * 2 + "Условие:</h4>"
+            result += nbsp + "Условие:</h4>"
             result += "<p>" + task_desc + "</p>"
             result += "</div>"
             result += "<div>"
@@ -505,7 +650,7 @@ def GenTestsHTML():
             result += "</div>"
             result += "<div>"
             result += "<button id='" + RunButtonId(tn) + "'>Запустить</button>"
-            result += nbsp * 2 + "Код программы:"
+            result += nbsp + "Код программы:"
             result += "</div>"
             result += "<div>"
             result += "<div id=" + InputCodeId(tn) + " style=\"height: 200px; width: 580px\"></div>"
@@ -548,9 +693,9 @@ def GenTestsHTML():
                 test_good_output = test[1]
                 result += "</tr>"
                 result += "<td> <b>" + str(test_num + 1) + ".</b></td>"
-                result += "<td>" + test_input + "</td>"
+                result += "<td><textarea readonly>" + test_input + "</textarea></td>"
                 in_id = InputTestId(tn, test_num)
-                result += "<td id='" + in_id + "'>" + test_good_output + "</td>"
+                result += "<td><textarea id='" + in_id + "' readonly>" + test_good_output + "</textarea></td>"
                 out_id = OutTestId(tn, test_num) 
                 result += "<td id='" + out_id + "'></td>"
                 run_id = RunTestId(tn, test_num)
@@ -597,6 +742,7 @@ for tn in g_tasks.keys():
         e.setValue(input_code);
     e.session.setMode("ace/mode/python");
     e.setOptions({"enableBasicAutocompletion": True, "enableSnippets": True, "enableLiveAutocompletion": True});
+    #e.setAutoScrollEditorIntoView(True);
 
 global is_dark_theme
 is_dark_theme = False
