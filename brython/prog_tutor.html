@@ -11,7 +11,7 @@
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12/brython_stdlib.js"></script>
 <script type="text/javascript" src="https://github.com/daurnimator/lua.vm.js"></script>
 <script type="text/javascript" src="https://ace.c9.io/build/src/ace.js"></script>
-<script type="text/javascript" src="https://ace.c9.io/build/src/theme-xcode.js"></script>
+<script type="text/javascript" src="https://ace.c9.io/build/src/theme-github.js"></script>
 <script type="text/javascript" src="https://ace.c9.io/build/src/theme-twilight.js"></script>
 <script type="text/javascript" src="https://ace.c9.io/build/src/mode-python.js"></script>
 <script type="text/javascript" src="https://ace.c9.io/build/src/mode-lua.js"></script>
@@ -25,7 +25,7 @@
 <script type="text/javascript" src="lua.vm.js@0.0.1"></script>
 <script type="text/javascript" src="ace/ace.js"></script>
 <script type="text/javascript" src="ace/theme-twilight.js"></script>
-<script type="text/javascript" src="ace/theme-xcode.js"></script>
+<script type="text/javascript" src="ace/theme-github.js"></script>
 <script type="text/javascript" src="ace/mode-python.js"></script>
 <script type="text/javascript" src="ace/mode-lua.js"></script>
 <script type="text/javascript" src="ace/mode-javascript.js"></script>
@@ -368,7 +368,7 @@ def RunLangHTML(tn, code_pref, execute):
         return
     document[OutputDataId(tn)].value = GetPrint();
     document[HtmlOutId(tn)].innerHTML = GetPrint();
-    task = g_tasks[int(tn)]
+    task = g_tasks.get(tn)
     if len(task) > 3:
         check_array = task[3]
         error = CheckTaskCode(check_array, input_code)
@@ -460,15 +460,13 @@ def RunTestButton(event, tn, test_num, test):
 global binds;
 binds = []
 
-global g_aces;
-g_aces = [];
-
 global g_tasks
+g_tasks = {}
 
 def GenTestsHTML():
     global g_aces;
     global g_tasks
-    g_tasks = []
+    g_tasks = {}
     result = ""
     global all_tests;
     global binds;
@@ -484,7 +482,8 @@ def GenTestsHTML():
         topen = "open"
         t_num = 0
         for task in r:
-            g_tasks += [task]
+            tn = str(r_num) + "_" + str(t_num)
+            g_tasks.update({tn: task})
             t_num += 1
             task_name = task[0]
             task_desc = task[1]
@@ -492,7 +491,6 @@ def GenTestsHTML():
             nbsp = "&nbsp;" * 6
             result += "<details id = 'r" + str(r_num) + "t" + str(t_num) + "' " + topen +"><summary> " + nbsp + " Задача " + str(r_num) + "." + str(t_num) + ": " + task_name + "</summary>"
             #topen = ""
-            tn = str(task_num)
             result += "<table> <tr><td>" + nbsp * 3 + "</td> <td>"
             result += "<div>"
             result += "<h4><a href=\"#r" + str(r_num) + "t" + str(t_num) + "\">"+ str(r_num) + "." + str(t_num) +"</a>"
@@ -511,7 +509,6 @@ def GenTestsHTML():
             result += "</div>"
             result += "<div>"
             result += "<div id=" + InputCodeId(tn) + " style=\"height: 200px; width: 580px\"></div>"
-            g_aces += [tn]
             result += "</div>"
             result += "<table> <tr><td>"
             result += "<div>"
@@ -592,7 +589,7 @@ for b in binds:
 
 global editors;
 editors = {}
-for tn in g_aces:
+for tn in g_tasks.keys():
     e = window.ace.edit(InputCodeId(tn))
     editors.update({tn: e});
     input_code = window.localStorage.getItem(StorageCodeId(tn));
@@ -613,7 +610,7 @@ def toggle_ld():
         if is_dark_theme:
             e.setTheme("ace/theme/twilight");
         else:
-            e.setTheme("ace/theme/xcode");
+            e.setTheme("ace/theme/github");
 
 window.toggle_ld = toggle_ld;
 
