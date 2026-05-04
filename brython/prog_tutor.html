@@ -11,6 +11,7 @@
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12/brython_stdlib.js"></script>
 <script type="text/javascript" src="https://github.com/daurnimator/lua.vm.js"></script>
 <script type="text/javascript" src="https://ace.c9.io/build/src/ace.js"></script>
+<script type="text/javascript" src="https://ace.c9.io/build/src/theme-xcode.js"></script>
 <script type="text/javascript" src="https://ace.c9.io/build/src/theme-twilight.js"></script>
 <script type="text/javascript" src="https://ace.c9.io/build/src/mode-python.js"></script>
 <script type="text/javascript" src="https://ace.c9.io/build/src/mode-lua.js"></script>
@@ -24,6 +25,7 @@
 <script type="text/javascript" src="lua.vm.js@0.0.1"></script>
 <script type="text/javascript" src="ace/ace.js"></script>
 <script type="text/javascript" src="ace/theme-twilight.js"></script>
+<script type="text/javascript" src="ace/theme-xcode.js"></script>
 <script type="text/javascript" src="ace/mode-python.js"></script>
 <script type="text/javascript" src="ace/mode-lua.js"></script>
 <script type="text/javascript" src="ace/mode-javascript.js"></script>
@@ -47,11 +49,6 @@
 <script type="text/python">
 
 from browser import document, html, window
-
-def toggle_ld():
-    element = document.body;
-    element.classList.toggle("dark");
-window.toggle_ld = toggle_ld;
 
 def CheckTaskCode(check_array, code):
     lang_name = document["lang"].value
@@ -299,6 +296,9 @@ all_tests = [
 def InputDataId(tn):
     return "input_data" + tn
 
+def HtmlOutId(tn):
+    return "HtmlOutId" + tn
+
 def StorageCodeId(tn):
     return "storage_code" + tn
 
@@ -367,6 +367,7 @@ def RunLangHTML(tn, code_pref, execute):
         document[OutputDataId(tn)].value = ""
         return
     document[OutputDataId(tn)].value = GetPrint();
+    document[HtmlOutId(tn)].innerHTML = GetPrint();
     task = g_tasks[int(tn)]
     if len(task) > 3:
         check_array = task[3]
@@ -494,8 +495,8 @@ def GenTestsHTML():
             tn = str(task_num)
             result += "<table> <tr><td>" + nbsp * 3 + "</td> <td>"
             result += "<div>"
-            result += "<h4>Условие:</h4>"
-            result += "<a href=\"#r" + str(r_num) + "t" + str(t_num) + "\">"+ str(r_num) + "." + str(t_num) +"</a>"
+            result += "<h4><a href=\"#r" + str(r_num) + "t" + str(t_num) + "\">"+ str(r_num) + "." + str(t_num) +"</a>"
+            result += nbsp * 2 + "Условие:</h4>"
             result += "<p>" + task_desc + "</p>"
             result += "</div>"
             result += "<div>"
@@ -506,7 +507,7 @@ def GenTestsHTML():
             result += "</div>"
             result += "<div>"
             result += "<button id='" + RunButtonId(tn) + "'>Запустить</button>"
-            result += "&nbsp;&nbsp; Код программы:"
+            result += nbsp * 2 + "Код программы:"
             result += "</div>"
             result += "<div>"
             result += "<div id=" + InputCodeId(tn) + " style=\"height: 200px; width: 580px\"></div>"
@@ -526,7 +527,11 @@ def GenTestsHTML():
             result += "<textarea id='" + OutputDataId(tn) + "' cols='40' rows='5'></textarea>"
             result += "</div>"
             result += "</div>"
-            result += "</td> </tr> </table>"
+            result += "</td> </tr>"
+            result += "<tr> <td>"
+            result += "<details><summary>Вывод в html</summary><p id = '" + HtmlOutId(tn) + "'></p></details>"
+            result += "</td> </tr>"
+            result += "</table>"
 
             def MakeRunButton(tn):
                 def _RunButton(event):
@@ -593,11 +598,26 @@ for tn in g_aces:
     input_code = window.localStorage.getItem(StorageCodeId(tn));
     if input_code:
         e.setValue(input_code);
-    e.setTheme("ace/theme/twilight");
     e.session.setMode("ace/mode/python");
     e.setOptions({"enableBasicAutocompletion": True, "enableSnippets": True, "enableLiveAutocompletion": True});
 
-window.toggle_ld();
+global is_dark_theme
+is_dark_theme = False
+
+def toggle_ld():
+    global is_dark_theme
+    is_dark_theme = not is_dark_theme
+    element = document.body;
+    element.classList.toggle("dark");
+    for tn, e in editors.items():
+        if is_dark_theme:
+            e.setTheme("ace/theme/twilight");
+        else:
+            e.setTheme("ace/theme/xcode");
+
+window.toggle_ld = toggle_ld;
+
+toggle_ld();
 
 </script>
 
@@ -613,22 +633,19 @@ window.toggle_ld();
 
 <style>
 body{
-    padding:0% 3% 10% 3%;
-}
-h1{
-    color: #32a852;
-    margin-top:30px;
 }
 
-button{
-    cursor: pointer;
-    border: 1px solid #555;
-    padding: 5px;
-    margin-left: 8px; 
-}
 .dark{
     background-color: #222;
     color: #e6e6e6;
+    textarea {
+        color: #e6e6e6;
+        background-color: #333;
+    }
+    button{
+        color: #e6e6e6;
+        background-color: #333;
+    }
 }
 </style>
 
