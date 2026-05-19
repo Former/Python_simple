@@ -1,0 +1,39 @@
+<!-- Copyright 2026 by Alexei Bezborodov <AlexeiBv+moneta@narod.ru>-->
+<!-- Public domain -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Орёл/решка</title>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12/brython.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12/brython_stdlib.js"></script>
+
+</head>
+<body>
+
+<p id="moneta">
+
+</p>
+
+<button onclick="flipped_coin();" id="click_moneta" style="width: 150px; height: 50px;">Бросить монету</button>
+
+
+<script type="text/python">
+from browser import document, html, window
+import random
+
+resh = '<img src=https://cdn.monetnik.ru/storage/market-lot/93/05/322393/1173266_big.jpg width=150>'
+orel = '<img src=https://cdn.monetnik.ru/storage/market-lot/61/87/164961/545469_big.jpg width=150>'
+
+def flipped_coin():
+    if random.randint(0, 1) == 0:
+        document["moneta"].innerHTML = resh
+    else:
+        document["moneta"].innerHTML = orel
+
+window.flipped_coin = flipped_coin
+
+</script>
+
+</body>
+</html>
