@@ -1,0 +1,191 @@
+<!-- Copyright 2026 by Alexei Bezborodov <AlexeiBv+vernam@narod.ru>-->
+<!-- Public domain -->
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Перекодировка</title>
+<!-- internet -- >
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12/brython.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.12/brython_stdlib.js"></script>
+< !--        -->
+
+<!-- local -->
+<script type="text/javascript" src="brython.min_3.12.js"></script>
+<script type="text/javascript" src="brython_stdlib_3.12.js"></script>
+<!--       -->
+
+</head>
+<body>
+
+<h2>Перекодировка</h2>
+
+<details> <summary>Настройки</summary>
+<div><label>Исходные символы</label></div>
+<div><textarea id="sym1" onkeyup="onchange_sym();" cols=80 rows=5></textarea></div>
+<div><label>Перекодированные символы</label></div>
+<div><textarea id="sym2" onkeyup="onchange_sym();" cols=80 rows=5></textarea></div>
+<details> <summary>Перекодировочная таблица</summary>
+<div id="char_table"></div>
+</details>
+</details>
+
+<div><label>Исходный текст</label></div>
+<div><textarea id="str1" cols=80 rows=10></textarea></div>
+<div><label>Перекодированный текст</label></div>
+<div><textarea id="str2" cols=80 rows=10></textarea></div>
+
+<div>
+<button id="encode">Зашифровать</button>
+<button id="decode">Расшифровать</button>
+</div>
+
+<script type="text/python">
+
+from browser import document, html, window
+
+import random
+
+def enc(sym1, sym2, str1):
+    r = ""
+    l = len(sym1[0])
+    for i in range(0, len(str1), l):
+        c = str1[i:i + l]
+        f = sym1.find(c)
+        if f != -1:
+            r += sym2[f]
+    return r
+
+def filter(str1, str_sym1):
+    r = ""
+    for c in str1:
+        if c in str_sym1:
+            r += c
+    return r
+
+def Do(swap):
+    global sym1
+    global sym2
+    global str_sym1
+    global str_sym2
+    str1 = document["str1"].value
+    str1 = filter(str1, str_sym1)
+    if swap:
+        r = enc(sym2, sym1, str1)
+    else:
+        r = enc(sym1, sym2, str1)
+    document["str2"].value = r
+
+def Encode(event):
+    Do(False)
+
+def Decode(event):
+    Do(True)
+
+sym1 = []
+sym2 = []
+str_sym1 = ""
+str_sym2 = ""
+def onchange_sym():
+    eng_char = "qwertyuiopasdfghjlzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM"
+    eng_char1 = "qwertyuiopasdfghjlzxc"
+    dig_char = " `1234567890-=\\~!@#$%^&*()_+|[];'/{}:\"<>?.,"
+    rus_char = "йцукенгшщзхъфывапролджэячсмитьбюЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ"
+    sym1_def = dig_char + rus_char  + eng_char1
+    sym2_def = "0123456789ABCDEF"
+
+    s1 = document["sym1"].value
+    if s1 == "":
+        s1 = sym1_def
+        document["sym1"].value = s1
+    s2 = document["sym2"].value
+    if s2 == "":
+        s2 = sym2_def
+        document["sym2"].value = s2
+    r1, r2 = make_syms(s1, s2)
+    document["char_table"].innerHTML = make_char_table(r1, r2)
+    global sym1
+    global sym2
+    global str_sym1
+    global str_sym2
+    sym1 = r1
+    sym2 = r2
+    str_sym1 = s1
+    str_sym2 = s2
+
+window.onchange_sym = onchange_sym
+
+def add1(l, max_l):
+    p = 1
+    for i in range(len(l)):
+        l[i] += p
+        p = 0
+        if l[i] >= max_l:
+            p = l[i] // max_l
+            l[i] = l[i] % max_l
+
+def get_sym(l, src_sym):
+    l1 = l[::-1]
+    r = ""
+    for i in range(len(l1)):
+        r += src_sym[l1[i]]
+    return r
+
+def get_sym_count(len1, len2):
+    r = 0
+    l = len1
+    while l > 0:
+        l = l // len2
+        r += 1
+        #print(l, r)
+    return r
+
+def make_syms(s1, s2):
+    r1 = []
+    r2 = []
+    len1 = len(s1)
+    len2 = len(s2)
+    l1 = [0] * max(1, get_sym_count(len1, len2))
+    l2 = [0] * max(1, get_sym_count(len2, len1))
+    for i in range(max(len1, len2)):
+        add1(l1, len1)
+        add1(l2, len2)
+        r1 += [get_sym(l1, s1)]
+        r2 += [get_sym(l2, s2)]
+    return r1, r2
+
+def make_char_table(s1, s2):
+    assert len(s1) == len(s2)
+    r = "<table border=1>"
+    r += "<tr><td>Номер</td><td>Из</td><td>В</td></tr>"
+    for y in range(len(s1)):
+        r += "<tr>"
+        r += "<td>" + str(y + 1) + "</td>"
+        r += "<td>" + s1[y] + "</td>"
+        r += "<td>" + s2[y] + "</td>"
+        r += "</tr>"
+    r += "</table>"
+    return r
+
+def Test():
+    l = [1,1,1,0]
+    add1(l, 2)
+    assert [0,0,0,1] == l, l
+    l = [1,1,1,0]
+    add1(l, 3)
+    assert [2,1,1,0] == l, l
+
+Test()
+onchange_sym()
+
+document["encode"].bind("click", Encode)
+document["decode"].bind("click", Decode)
+
+</script>
+
+</body>
+
+</html>
+
+
