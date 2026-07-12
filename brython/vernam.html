@@ -37,7 +37,8 @@
 <div><textarea id="enc_str" cols=80 rows=10></textarea></div>
 
 <div>
-<button id="encode">Зашифровать</button>
+<div id="warning"></div>
+<div><button id="encode">Зашифровать</button></div>
 </div>
 
 <script type="text/python">
@@ -55,7 +56,12 @@ if all_str == "":
     all_str = dig_char + rus_char  + eng_char1
     document["all_str"].value = all_str
 
-#print(len(all_char))
+def filter(dust_str, str_symbols):
+    r = ""
+    for c in dust_str:
+        if c in str_symbols:
+            r += c
+    return r
 
 def ord_char(c1):
     global all_str
@@ -82,8 +88,13 @@ def enc(src_str, key):
 
 
 def Encode(event):
+    global all_str
     src_str = document["src_str"].value
+    src_str = filter(src_str, all_str)
+    document["src_str"].value = src_str
+
     key_str = document["key_str"].value
+    key_str = filter(key_str, all_str)
     if key_str == "":
         key_str = gen_key(len(src_str))
         document["key_str"].value = key_str
@@ -93,6 +104,10 @@ def onchange_all_str():
     global all_str
     all_str = document["all_str"].value
     document["char_table"].innerHTML = make_char_table(all_str)
+
+    document["warning"].innerHTML = ""
+    if not len(all_str) in [2,4,8,16,32,64,128,256,512,1024,2048]:
+        document["warning"].innerHTML = "<p style='color:red;'>Вимание!! Число символов не кратно 2!!<p>"
 window.onchange_all_str = onchange_all_str
 
 def make_char_table(all_str):
@@ -113,11 +128,11 @@ def make_char_table(all_str):
             xor = ""
             if len(c1 + c2) < 2:
                 td = "th"
-                color = " bgcolor=green "
+                color = " bgcolor=#C0C0C0 "
                 xor = c1 + c2
             else:
                 xor = xor_char(c1, c2)
-            r += "<"+td+color+">" + xor + "</"+td+">"
+            r += "<"+td+color+" width=20px>" + xor + "</"+td+">"
         r += "</tr>"
     r += "</table>"
     return r

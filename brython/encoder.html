@@ -61,10 +61,10 @@ def Convert(sym, str1):
             r += f
     return r
 
-def filter(str1, str_sym1):
+def filter(dust_str, str_symbols):
     r = ""
-    for c in str1:
-        if c in str_sym1:
+    for c in dust_str:
+        if c in str_symbols:
             r += c
     return r
 
