@@ -24,7 +24,7 @@
 <details> <summary>Настройки</summary>
 <div><label>Исходные символы</label></div>
 <div><textarea id="sym1" onkeyup="onchange_sym();" cols=80 rows=5></textarea></div>
-<div><label>Перекодированные символы</label></div>
+<div><label>Перекодировочные символы</label></div>
 <div><textarea id="sym2" onkeyup="onchange_sym();" cols=80 rows=5></textarea></div>
 <details> <summary>Перекодировочная таблица</summary>
 <div id="char_table"></div>
@@ -46,9 +46,9 @@
 from browser import document, html, window
 
 import random
+import math
 
 def Convert(sym, str1):
-    #print(Convert, sym, str1)
     r = ""
     l = 0
     for k in sym.keys():
@@ -56,7 +56,6 @@ def Convert(sym, str1):
         break
     for i in range(0, len(str1), l):
         c = str1[i:i + l]
-        #print(Convert, c)
         f = sym.get(c)
         if f != None:
             r += f
@@ -81,7 +80,6 @@ def Do(swap):
     else:
         str1 = filter(str1, str_sym1)
         r = Convert(sym, str1)
-    #print(Do, r)
     document["str2"].value = r
 
 def Encode(event):
@@ -110,8 +108,7 @@ def onchange_sym():
         s2 = sym2_def
         document["sym2"].value = s2
     r = make_sym(s1, s2)
-    #print(r, type(r))
-    document["char_table"].innerHTML = make_char_table(r)
+    document["char_table"].innerHTML = make_char_table(s1, r)
     global sym
     global str_sym1
     global str_sym2
@@ -135,7 +132,6 @@ def get_sym(l, src_sym):
     r = ""
     for i in range(len(l1)):
         r += src_sym[l1[i]]
-    #print(get_sym, r, l1, l)
     return r
 
 def get_sym_count(len1, len2):
@@ -151,26 +147,35 @@ def make_sym(s1, s2):
     r = {}
     len1 = len(s1)
     len2 = len(s2)
-    #print(make_sym, s1, s2)
     l1 = [0] * max(1, get_sym_count(len2, len1))
     l2 = [0] * max(1, get_sym_count(len1, len2))
     for i in range(max(len1, len2)):
         r.update({get_sym(l1, s1): get_sym(l2, s2)})
-        #print(make_sym, l1, l2)
         add1(l1, len1)
         add1(l2, len2)
     return r
 
-def make_char_table(sym):
+def make_char_table(s1, sym):
+    r = "<table border=1><tr>"
+    d = int(1.5 * math.sqrt(len(sym)))
+    l = len(sym)
+    for i in range(0, l, d):
+        r += "<td>"
+        r += make_char_table_part(s1, sym, i, min(i + d, l))
+        r += "</td>"
+    r += "</tr>"
+    r += "</table>"
+    return r
+
+def make_char_table_part(s1, sym, start, stop):
     r = "<table border=1>"
-    r += "<tr><td>Номер</td><td>Из</td><td>В</td></tr>"
+    r += "<tr><td bgcolor='gray'>Из</td><td bgcolor='gray'>В</td></tr>"
     y = 0
-    for s1,s2 in sym.items():
+    for i in range(start, stop):
         y += 1
         r += "<tr>"
-        r += "<td>" + str(y) + "</td>"
-        r += "<td>" + s1 + "</td>"
-        r += "<td>" + s2 + "</td>"
+        r += "<td bgcolor=#C0C0C0> <b>" + s1[i] + " </b> </td>"
+        r += "<td>" + sym.get(s1[i]) + "</td>"
         r += "</tr>"
     r += "</table>"
     return r
