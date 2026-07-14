@@ -29,12 +29,22 @@
 </details>
 </details>
 
-<div><label>Исходный текст</label></div>
-<div><textarea id="src_str" cols=80 rows=10></textarea></div>
-<div><label>Ключ</label></div>
-<div><textarea id="key_str" cols=80 rows=10></textarea></div>
-<div><label>Шифрованный текст</label></div>
-<div><textarea id="enc_str" cols=80 rows=10></textarea></div>
+<div>
+<label><b>Исходный текст</b></label>
+<label>Длина сообщения</label>
+<input id = "message_len" type="number" value="0" step="1" />
+</div>
+<div><textarea id="src_str" onkeyup="onchange_src_str();" cols=80 rows=5></textarea></div>
+<div id="src_str_info"></div>
+<div>
+<label><b>Ключ</b></label>
+<label>Номер ключа </label>
+<input id = "key_num" type="number" value="0" step="1" />
+</div>
+<div><textarea id="key_str" cols=80 rows=5></textarea></div>
+
+<label><b>Шифрованный текст</b></label>
+<div><textarea id="enc_str" cols=80 rows=5></textarea></div>
 
 <div>
 <div id="warning"></div>
@@ -55,6 +65,12 @@ all_str = document["all_str"].value
 if all_str == "":
     all_str = dig_char + rus_char  + eng_char1
     document["all_str"].value = all_str
+
+def get_message_len():
+    return int(document["message_len"].value)
+
+def get_key_num():
+    return int(document["key_num"].value)
 
 def filter(dust_str, str_symbols):
     r = ""
@@ -88,17 +104,36 @@ def enc(src_str, key):
 
 
 def Encode(event):
+
     global all_str
     src_str = document["src_str"].value
     src_str = filter(src_str, all_str)
+
+    l = len(src_str)
+    ml = get_message_len()
+    if ml > 0:
+        l = ml
+
+    ls = len(src_str)
+    if ls < l:
+        src_str += gen_key(l - ls)
     document["src_str"].value = src_str
 
     key_str = document["key_str"].value
     key_str = filter(key_str, all_str)
+    kn = get_key_num()
+
     if key_str == "":
-        key_str = gen_key(len(src_str))
+        key_str = gen_key(l * (kn + 1))
         document["key_str"].value = key_str
-    document["enc_str"].value = enc(src_str, key_str)
+    k = key_str[kn * l:(kn + 1) * l]
+    r = ""
+    document["warning"].innerHTML = ""
+    if k == "":
+        document["warning"].innerHTML = "<p style='color:red;'>Вимание!! Номер ключа больше возможного<p>"
+    else:
+        r = enc(src_str, k)
+    document["enc_str"].value = r
 
 def onchange_all_str():
     global all_str
@@ -109,6 +144,18 @@ def onchange_all_str():
     if not len(all_str) in [2,4,8,16,32,64,128,256,512,1024,2048]:
         document["warning"].innerHTML = "<p style='color:red;'>Вимание!! Число символов не кратно 2!!<p>"
 window.onchange_all_str = onchange_all_str
+
+def onchange_src_str():
+    src_str = document["src_str"].value
+    l = len(src_str)
+    r = "<p>"
+    r += "Длина текущего сообщения " + str(l) + " символов."
+    ml = get_message_len()
+    if ml != 0 and l > ml:
+        r += " Cообщение больше максимальной длинны."
+    r += "</p>"
+    document["src_str_info"].innerHTML = r
+window.onchange_src_str = onchange_src_str
 
 def make_char_table(all_str):
     l = len(all_str)
