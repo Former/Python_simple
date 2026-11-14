@@ -41,6 +41,8 @@
 <label>Номер ключа </label>
 <input id = "key_num" type="number" value="0" step="1" />
 </div>
+<input type="file" name="inputkeyfile" id="inputkeyfile">
+<br>
 <div><textarea id="key_str" cols=80 rows=5></textarea></div>
 
 <label><b>Шифрованный текст</b></label>
@@ -50,6 +52,23 @@
 <div id="warning"></div>
 <div><button id="encode">Зашифровать</button></div>
 </div>
+
+<script>
+
+document.getElementById('inputkeyfile')
+			.addEventListener('change', function () {
+
+				let fr = new FileReader();
+				fr.onload = function () {
+					document.getElementById('key_str')
+						.textContent = fr.result;
+				}
+
+				fr.readAsText(this.files[0]);
+			})
+
+</script>
+
 
 <script type="text/python">
 
